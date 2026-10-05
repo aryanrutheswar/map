@@ -1,0 +1,24 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-native",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "react-native-maps": ["./src/index"]
+    },
+    "declaration": true,
+    "declarationMap": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    // required for project references (optional if not used)
+    "composite": true,
+    "verbatimModuleSyntax": true
+  },
+  "include": ["src", "plugin"],
+  "exclude": ["**/Pods/**", "dist"]
+}
