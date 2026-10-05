@@ -1483,4 +1483,50 @@ body, html {
   transition: transform 0.06s linear;
 }
 
+/* ============================================================
+   LOCAL AREA SCOPING & FOCUS BADGE
+   ============================================================ */
+.poi-chip-highlight {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.25));
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #34d399;
+  font-weight: 700;
+}
+
+.poi-chip-highlight:hover {
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+}
+
+.focus-area-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 3px 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+.focus-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.poi-card-dist {
+  color: #38bdf8 !important;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
 

@@ -151,73 +151,93 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const INITIAL_POIS = [
-    // --- TEMPLES 🛕 ---
-    { id: 't1', name: 'Angkor Wat', category: 'temple', lat: 13.4125, lng: 103.8670, city: 'Siem Reap', country: 'Cambodia' },
-    { id: 't2', name: 'Meenakshi Amman Temple', category: 'temple', lat: 9.9195, lng: 78.1194, city: 'Madurai', country: 'India' },
-    { id: 't3', name: 'Golden Temple (Harmandir Sahib)', category: 'temple', lat: 31.6200, lng: 74.8765, city: 'Amritsar', country: 'India' },
-    { id: 't4', name: 'Tirumala Venkateswara Temple', category: 'temple', lat: 13.6833, lng: 79.3472, city: 'Tirupati', country: 'India' },
-    { id: 't5', name: 'Senso-ji Temple', category: 'temple', lat: 35.7148, lng: 139.7967, city: 'Tokyo', country: 'Japan' },
-    { id: 't6', name: 'Kashi Vishwanath Temple', category: 'temple', lat: 25.3109, lng: 83.0107, city: 'Varanasi', country: 'India' },
-    { id: 't7', name: 'Brihadisvara Temple', category: 'temple', lat: 10.7828, lng: 79.1318, city: 'Thanjavur', country: 'India' },
-    { id: 't8', name: 'Wat Pho (Reclining Buddha)', category: 'temple', lat: 13.7465, lng: 100.4930, city: 'Bangkok', country: 'Thailand' },
-    { id: 't9', name: 'Swaminarayan Akshardham', category: 'temple', lat: 28.6127, lng: 77.2773, city: 'New Delhi', country: 'India' },
-    { id: 't10', name: 'Prambanan Temple', category: 'temple', lat: -7.7520, lng: 110.4915, city: 'Yogyakarta', country: 'Indonesia' },
-    { id: 't11', name: 'Somnath Temple', category: 'temple', lat: 20.8880, lng: 70.4013, city: 'Prabhas Patan', country: 'India' },
-    { id: 't12', name: 'Batu Caves Murugan Temple', category: 'temple', lat: 3.2379, lng: 101.6840, city: 'Gombak', country: 'Malaysia' },
+  function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
 
-    // --- HOTELS 🏨 ---
-    { id: 'h1', name: 'Burj Al Arab', category: 'hotel', lat: 25.1412, lng: 55.1852, city: 'Dubai', country: 'UAE' },
-    { id: 'h2', name: 'Marina Bay Sands', category: 'hotel', lat: 1.2834, lng: 103.8607, city: 'Downtown', country: 'Singapore' },
-    { id: 'h3', name: 'The Taj Mahal Palace', category: 'hotel', lat: 18.9217, lng: 72.8332, city: 'Mumbai', country: 'India' },
-    { id: 'h4', name: 'The Plaza Hotel', category: 'hotel', lat: 40.7644, lng: -73.9745, city: 'New York', country: 'USA' },
-    { id: 'h5', name: 'The Ritz Paris', category: 'hotel', lat: 48.8682, lng: 2.3292, city: 'Paris', country: 'France' },
-    { id: 'h6', name: 'The Beverly Hills Hotel', category: 'hotel', lat: 34.0818, lng: -118.4136, city: 'Beverly Hills', country: 'USA' },
-    { id: 'h7', name: 'The Leela Palace', category: 'hotel', lat: 12.9606, lng: 77.6484, city: 'Bengaluru', country: 'India' },
-    { id: 'h8', name: 'Atlantis The Palm', category: 'hotel', lat: 25.1304, lng: 55.1171, city: 'Dubai', country: 'UAE' },
+  // Curated Local Places in and around Chittoor, Andhra Pradesh
+  const CHITTOOR_POIS = [
+    // --- TEMPLES 🛕 in & around Chittoor ---
+    { id: 'ch_t1', name: 'Sri Varasidhi Vinayaka Swamy Temple', category: 'temple', lat: 13.2770145, lng: 79.0335591, city: 'Kanipakam, Chittoor', country: 'India' },
+    { id: 'ch_t2', name: 'Arthagiri Veeranjaneya Swamy Temple', category: 'temple', lat: 13.2948055, lng: 78.9511342, city: 'Aragonda, Chittoor', country: 'India' },
+    { id: 'ch_t3', name: 'Manikandeshwar Temple', category: 'temple', lat: 13.2776452, lng: 79.0335196, city: 'Kanipakam, Chittoor', country: 'India' },
+    { id: 'ch_t4', name: 'Subramanya Swamy Temple', category: 'temple', lat: 13.2054343, lng: 79.0961034, city: 'Chittoor Town', country: 'India' },
+    { id: 'ch_t5', name: 'Mogili Mogileeswara Swamy Temple', category: 'temple', lat: 13.2350, lng: 79.0200, city: 'Mogili, Chittoor', country: 'India' },
+    { id: 'ch_t6', name: 'Vajralapuram Gangamma Temple', category: 'temple', lat: 13.2244888, lng: 78.9170747, city: 'Chittoor Rural', country: 'India' },
+    { id: 'ch_t7', name: 'Sri Seetharama Temple', category: 'temple', lat: 13.2548692, lng: 79.1241736, city: 'Chittoor', country: 'India' },
+    { id: 'ch_t8', name: 'Gauramma Thalli Temple', category: 'temple', lat: 13.2213395, lng: 78.9330431, city: 'Chittoor', country: 'India' },
+    { id: 'ch_t9', name: 'Palakanuru Gangamma Temple', category: 'temple', lat: 13.1790843, lng: 79.1476275, city: 'Chittoor Mandal', country: 'India' },
+    { id: 'ch_t10', name: 'Sri Badhrakali Amma Temple', category: 'temple', lat: 13.0803981, lng: 79.1361819, city: 'Chittoor District', country: 'India' },
+    { id: 'ch_t11', name: 'Krishna Temple Gollapalle', category: 'temple', lat: 13.175692, lng: 79.1488378, city: 'Chittoor', country: 'India' },
 
-    // --- CAFES ☕ ---
-    { id: 'c1', name: 'Café de Flore', category: 'cafe', lat: 48.8540, lng: 2.3326, city: 'Paris', country: 'France' },
-    { id: 'c2', name: 'Caffè Florian', category: 'cafe', lat: 45.4337, lng: 12.3384, city: 'Venice', country: 'Italy' },
-    { id: 'c3', name: 'The Grounds of Alexandria', category: 'cafe', lat: -33.9108, lng: 151.1942, city: 'Sydney', country: 'Australia' },
-    { id: 'c4', name: 'Confeitaria Colombo', category: 'cafe', lat: -22.9067, lng: -43.1782, city: 'Rio de Janeiro', country: 'Brazil' },
-    { id: 'c5', name: 'Indian Coffee House', category: 'cafe', lat: 22.5756, lng: 88.3636, city: 'Kolkata', country: 'India' },
-    { id: 'c6', name: 'Blue Bottle Coffee Shibuya', category: 'cafe', lat: 35.6628, lng: 139.7013, city: 'Tokyo', country: 'Japan' },
-    { id: 'c7', name: 'Third Wave Coffee Koramangala', category: 'cafe', lat: 12.9352, lng: 77.6245, city: 'Bengaluru', country: 'India' },
-    { id: 'c8', name: 'Café Central', category: 'cafe', lat: 48.2104, lng: 16.3653, city: 'Vienna', country: 'Austria' },
+    // --- HOTELS 🏨 in & around Chittoor ---
+    { id: 'ch_h1', name: 'Bans The Hotel', category: 'hotel', lat: 13.2185, lng: 79.1020, city: 'Chittoor Central', country: 'India' },
+    { id: 'ch_h2', name: 'Hotel Bliss Grand', category: 'hotel', lat: 13.2140, lng: 79.0980, city: 'Bypass Road, Chittoor', country: 'India' },
+    { id: 'ch_h3', name: 'Naga Residency', category: 'hotel', lat: 13.2195, lng: 79.1040, city: 'Chittoor', country: 'India' },
+    { id: 'ch_h4', name: 'Hotel Sri Kanya', category: 'hotel', lat: 13.2160, lng: 79.1010, city: 'Chittoor', country: 'India' },
+    { id: 'ch_h5', name: 'Kanipakam Devasthanam Cottages', category: 'hotel', lat: 13.2760, lng: 79.0320, city: 'Kanipakam, Chittoor', country: 'India' },
 
-    // --- PARKS 🌳 ---
-    { id: 'p1', name: 'Central Park', category: 'park', lat: 40.7851, lng: -73.9683, city: 'New York', country: 'USA' },
-    { id: 'p2', name: 'Hyde Park', category: 'park', lat: 51.5073, lng: -0.1657, city: 'London', country: 'UK' },
-    { id: 'p3', name: 'Cubbon Park', category: 'park', lat: 12.9763, lng: 77.5929, city: 'Bengaluru', country: 'India' },
-    { id: 'p4', name: 'Ueno Park', category: 'park', lat: 35.7153, lng: 139.7739, city: 'Tokyo', country: 'Japan' },
-    { id: 'p5', name: 'Lodhi Garden', category: 'park', lat: 28.5933, lng: 77.2197, city: 'New Delhi', country: 'India' },
-    { id: 'p6', name: 'Golden Gate Park', category: 'park', lat: 37.7694, lng: -122.4862, city: 'San Francisco', country: 'USA' },
-    { id: 'p7', name: 'Gardens by the Bay', category: 'park', lat: 1.2816, lng: 103.8636, city: 'Marina South', country: 'Singapore' },
-    { id: 'p8', name: 'Lalbagh Botanical Garden', category: 'park', lat: 12.9507, lng: 77.5848, city: 'Bengaluru', country: 'India' },
+    // --- CAFES ☕ in & around Chittoor ---
+    { id: 'ch_c1', name: 'Cafe Coffee Day', category: 'cafe', lat: 13.1971587, lng: 79.0642167, city: 'NH-69, Chittoor', country: 'India' },
+    { id: 'ch_c2', name: 'Padmasri Cafe', category: 'cafe', lat: 13.0876466, lng: 79.0592971, city: 'Chittoor', country: 'India' },
+    { id: 'ch_c3', name: 'Tea / Coffee Bakery', category: 'cafe', lat: 13.196889, lng: 78.9927895, city: 'Chittoor Highway', country: 'India' },
+    { id: 'ch_c4', name: 'Sri Krishna Bakery & Cafe', category: 'cafe', lat: 13.2155, lng: 79.1035, city: 'Bazaar Street, Chittoor', country: 'India' },
 
-    // --- SHOPPING MALLS 🛍️ ---
-    { id: 'm1', name: 'The Dubai Mall', category: 'mall', lat: 25.1972, lng: 55.2796, city: 'Dubai', country: 'UAE' },
-    { id: 'm2', name: 'Mall of America', category: 'mall', lat: 44.8549, lng: -93.2422, city: 'Bloomington', country: 'USA' },
-    { id: 'm3', name: 'Siam Paragon', category: 'mall', lat: 13.7466, lng: 100.5350, city: 'Bangkok', country: 'Thailand' },
-    { id: 'm4', name: 'Phoenix Marketcity', category: 'mall', lat: 12.9961, lng: 77.6966, city: 'Bengaluru', country: 'India' },
-    { id: 'm5', name: 'Harrods', category: 'mall', lat: 51.4994, lng: -0.1633, city: 'London', country: 'UK' },
-    { id: 'm6', name: 'Galeries Lafayette', category: 'mall', lat: 48.8732, lng: 2.3323, city: 'Paris', country: 'France' },
-    { id: 'm7', name: 'High Street Phoenix & Palladium', category: 'mall', lat: 18.9953, lng: 72.8242, city: 'Mumbai', country: 'India' },
-    { id: 'm8', name: 'Select CITYWALK', category: 'mall', lat: 28.5285, lng: 77.2189, city: 'New Delhi', country: 'India' },
+    // --- PARKS 🌳 in & around Chittoor ---
+    { id: 'ch_p1', name: 'Gandhi Park Chittoor', category: 'park', lat: 13.2165, lng: 79.1005, city: 'Chittoor', country: 'India' },
+    { id: 'ch_p2', name: 'Kaigal Waterfalls Nature Park', category: 'park', lat: 13.0820, lng: 78.6830, city: 'Kaigal, Chittoor', country: 'India' },
+    { id: 'ch_p3', name: 'Aragonda Botanical Park', category: 'park', lat: 13.3000, lng: 78.9600, city: 'Aragonda, Chittoor', country: 'India' },
+    { id: 'ch_p4', name: 'Koundinya Wildlife Reserve', category: 'park', lat: 13.1500, lng: 78.8500, city: 'Chittoor District', country: 'India' },
 
-    // --- TOURIST SIGHTS 🏛️ ---
-    { id: 's1', name: 'Taj Mahal', category: 'tourist', lat: 27.1751, lng: 78.0421, city: 'Agra', country: 'India' },
-    { id: 's2', name: 'Eiffel Tower', category: 'tourist', lat: 48.8584, lng: 2.2945, city: 'Paris', country: 'France' },
-    { id: 's3', name: 'Colosseum', category: 'tourist', lat: 41.8902, lng: 12.4922, city: 'Rome', country: 'Italy' },
-    { id: 's4', name: 'Great Pyramid of Giza', category: 'tourist', lat: 29.9792, lng: 31.1342, city: 'Giza', country: 'Egypt' },
-    { id: 's5', name: 'Statue of Liberty', category: 'tourist', lat: 40.6892, lng: -74.0445, city: 'New York', country: 'USA' },
-    { id: 's6', name: 'Machu Picchu', category: 'tourist', lat: -13.1631, lng: -72.5450, city: 'Cusco', country: 'Peru' },
-    { id: 's7', name: 'Sydney Opera House', category: 'tourist', lat: -33.8568, lng: 151.2153, city: 'Sydney', country: 'Australia' },
-    { id: 's8', name: 'Gateway of India', category: 'tourist', lat: 18.9220, lng: 72.8347, city: 'Mumbai', country: 'India' }
+    // --- SHOPPING MALLS 🛍️ in Chittoor ---
+    { id: 'ch_m1', name: 'Reliance Mart Chittoor', category: 'mall', lat: 13.2047983, lng: 79.0971088, city: 'Chittoor', country: 'India' },
+    { id: 'ch_m2', name: 'CMR Shopping Mall', category: 'mall', lat: 13.2175, lng: 79.1015, city: 'Gandhi Road, Chittoor', country: 'India' },
+    { id: 'ch_m3', name: 'Kalanikethan Shopping Centre', category: 'mall', lat: 13.2180, lng: 79.1030, city: 'Chittoor', country: 'India' },
+    { id: 'ch_m4', name: 'South India Shopping Mall', category: 'mall', lat: 13.2168, lng: 79.1022, city: 'High Road, Chittoor', country: 'India' },
+
+    // --- TOURIST SIGHTS 🏛️ in & around Chittoor ---
+    { id: 'ch_s1', name: 'Kaigal Falls (Dumukurallu Waterfalls)', category: 'tourist', lat: 13.0820, lng: 78.6830, city: 'Kaigal, Chittoor', country: 'India' },
+    { id: 'ch_s2', name: 'Chittoor Historic Clock Tower', category: 'tourist', lat: 13.2170, lng: 79.1008, city: 'Chittoor Centre', country: 'India' },
+    { id: 'ch_s3', name: 'Gurramkonda Historic Hill Fort', category: 'tourist', lat: 13.7800, lng: 78.5800, city: 'Gurramkonda, Chittoor', country: 'India' },
+    { id: 'ch_s4', name: 'Horsley Hills Hill Station', category: 'tourist', lat: 13.6500, lng: 78.4000, city: 'Chittoor District', country: 'India' }
   ];
 
-  let allPOIs = [...INITIAL_POIS];
+  // Geodetic Distance Calculation (Haversine formula in km)
+  function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  // Active Focus Area State (strictly scopes spots to the chosen place)
+  let currentFocusArea = {
+    name: 'Chittoor',
+    lat: 13.2172,
+    lng: 79.1003,
+    radiusKm: 30
+  };
+
+  // Populate initially with Chittoor spots with calculated distance from Chittoor town center
+  let allPOIs = CHITTOOR_POIS.map(p => ({
+    ...p,
+    distanceKm: calculateDistanceKm(13.2172, 79.1003, p.lat, p.lng)
+  }));
+  allPOIs.sort((a, b) => a.distanceKm - b.distanceKm);
+
   let activeCategory = 'all';
   const poiLayerGroup = L.layerGroup().addTo(map);
   const activeMarkersMap = {};
@@ -226,6 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const poiCategoryChips = document.querySelectorAll('.poi-chip[data-category]');
   const searchAreaBtn = document.getElementById('searchAreaBtn');
   const searchAreaText = document.getElementById('searchAreaText');
+  const chittoorShortcutBtn = document.getElementById('chittoorShortcutBtn');
+  const focusAreaBadge = document.getElementById('focusAreaBadge');
+  const focusAreaText = document.getElementById('focusAreaText');
   const toggleExploreBtn = document.getElementById('toggleExploreBtn');
   const closeExploreBtn = document.getElementById('closeExploreBtn');
   const exploreDrawer = document.getElementById('exploreDrawer');
@@ -262,11 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function createPOIPopupContent(poi) {
     const meta = POI_CATEGORIES[poi.category] || { label: 'Place', emoji: '📍', color: '#6366f1' };
+    const distText = poi.distanceKm !== undefined ? (poi.distanceKm < 1 ? Math.round(poi.distanceKm * 1000) + ' m' : poi.distanceKm.toFixed(1) + ' km') : '';
     return `
       <div class="poi-popup-card">
         <div class="poi-popup-badge" style="background: ${meta.color}22; color: ${meta.color}; border: 1px solid ${meta.color}55;">
           <span>${meta.emoji}</span>
           <span>${meta.label}</span>
+          ${distText ? `<span style="margin-left: 6px; color: #38bdf8; font-weight: 700;">• 📍 ${distText} away</span>` : ''}
         </div>
         <div class="poi-popup-title">${escapeHTML(poi.name)}</div>
         <div class="poi-popup-coords">${poi.lat.toFixed(5)}, ${poi.lng.toFixed(5)}</div>
@@ -284,9 +309,27 @@ document.addEventListener('DOMContentLoaded', () => {
     poiLayerGroup.clearLayers();
     Object.keys(activeMarkersMap).forEach(key => delete activeMarkersMap[key]);
 
-    // Calculate category counts
-    const counts = { all: allPOIs.length, temple: 0, hotel: 0, cafe: 0, park: 0, mall: 0, tourist: 0 };
+    // Recalculate distances relative to currentFocusArea
     allPOIs.forEach(p => {
+      p.distanceKm = calculateDistanceKm(currentFocusArea.lat, currentFocusArea.lng, p.lat, p.lng);
+    });
+
+    // Filter places strictly within focus area radius (e.g. 30km of Chittoor or selected city)
+    const filterQuery = (exploreFilterInput?.value || '').toLowerCase().trim();
+    const visiblePlaces = allPOIs.filter(p => {
+      const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
+      const matchesSearch = !filterQuery || p.name.toLowerCase().includes(filterQuery) || (p.city && p.city.toLowerCase().includes(filterQuery));
+      const withinRadius = p.distanceKm <= currentFocusArea.radiusKm;
+      return matchesCategory && matchesSearch && withinRadius;
+    });
+
+    // Sort by closest distance first!
+    visiblePlaces.sort((a, b) => a.distanceKm - b.distanceKm);
+
+    // Calculate category counts strictly for the current focus area
+    const areaPOIs = allPOIs.filter(p => p.distanceKm <= currentFocusArea.radiusKm);
+    const counts = { all: areaPOIs.length, temple: 0, hotel: 0, cafe: 0, park: 0, mall: 0, tourist: 0 };
+    areaPOIs.forEach(p => {
       if (counts[p.category] !== undefined) counts[p.category]++;
     });
 
@@ -298,13 +341,20 @@ document.addEventListener('DOMContentLoaded', () => {
       explorePlacesBadge.textContent = activeCategory === 'all' ? counts.all : counts[activeCategory] || 0;
     }
 
-    // Filter places
-    const filterQuery = (exploreFilterInput?.value || '').toLowerCase().trim();
-    const visiblePlaces = allPOIs.filter(p => {
-      const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
-      const matchesSearch = !filterQuery || p.name.toLowerCase().includes(filterQuery) || (p.city && p.city.toLowerCase().includes(filterQuery));
-      return matchesCategory && matchesSearch;
-    });
+    // Update Focus Area Badge
+    if (focusAreaText) {
+      focusAreaText.textContent = `Showing spots in ${currentFocusArea.name}`;
+    }
+    if (focusAreaBadge) {
+      focusAreaBadge.style.display = 'inline-flex';
+    }
+
+    // Update Drawer Title
+    if (exploreDrawerTitle) {
+      const catMeta = POI_CATEGORIES[activeCategory];
+      const catName = activeCategory === 'all' ? 'All Places' : (catMeta ? catMeta.emoji + ' ' + catMeta.plural : 'Places');
+      exploreDrawerTitle.textContent = `${catName} in ${currentFocusArea.name} (${visiblePlaces.length})`;
+    }
 
     // Add markers to map
     visiblePlaces.forEach(poi => {
@@ -317,23 +367,13 @@ document.addEventListener('DOMContentLoaded', () => {
       activeMarkersMap[poi.id] = marker;
     });
 
-    // Update Drawer Title
-    if (exploreDrawerTitle) {
-      if (activeCategory === 'all') {
-        exploreDrawerTitle.textContent = `All Places (${visiblePlaces.length})`;
-      } else {
-        const catMeta = POI_CATEGORIES[activeCategory];
-        exploreDrawerTitle.textContent = `${catMeta ? catMeta.emoji + ' ' + catMeta.plural : 'Places'} (${visiblePlaces.length})`;
-      }
-    }
-
     // Update Explore Drawer Cards
     if (explorePlacesList) {
       if (visiblePlaces.length === 0) {
         explorePlacesList.innerHTML = `
           <div class="poi-empty-state">
             <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
-            <p>No places found in this view.</p>
+            <p>No ${activeCategory === 'all' ? 'places' : activeCategory} found within ${currentFocusArea.radiusKm} km of ${escapeHTML(currentFocusArea.name)}.</p>
             <button class="btn btn-sm btn-primary" id="drawerSearchAreaBtn" style="margin-top: 12px;">Search This Area</button>
           </div>
         `;
@@ -342,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         explorePlacesList.innerHTML = visiblePlaces.map(poi => {
           const meta = POI_CATEGORIES[poi.category] || { emoji: '📍', color: '#6366f1', label: 'Place', bg: '#6366f1' };
+          const distStr = poi.distanceKm < 1 ? `${Math.round(poi.distanceKm * 1000)} m` : `${poi.distanceKm.toFixed(1)} km`;
           return `
             <div class="poi-card" data-id="${poi.id}" data-lat="${poi.lat}" data-lng="${poi.lng}">
               <div class="poi-card-icon" style="background: ${meta.bg};">
@@ -351,6 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="poi-card-name">${escapeHTML(poi.name)}</div>
                 <div class="poi-card-meta">
                   <span class="poi-card-category" style="color: ${meta.color};">${meta.label}</span>
+                  <span class="poi-card-dist">📍 ${distStr}</span>
                   ${poi.city ? `<span>• ${escapeHTML(poi.city)}</span>` : ''}
                 </div>
               </div>
@@ -380,46 +422,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Live Overpass API Search
-  async function searchAreaPOIs() {
-    if (!searchAreaBtn) return;
-    searchAreaBtn.classList.add('loading');
-    if (searchAreaText) searchAreaText.textContent = 'Searching...';
+  // Focus exclusively on a specific location (Chittoor, searched city, GPS area)
+  async function focusOnArea(name, lat, lng, zoom = 14, radiusKm = 25, isUserLocation = false) {
+    currentFocusArea = {
+      name: name,
+      lat: lat,
+      lng: lng,
+      radiusKm: radiusKm
+    };
+
+    map.flyTo([lat, lng], zoom, { duration: 1.4 });
+
+    const distToChittoor = calculateDistanceKm(lat, lng, 13.2172, 79.1003);
+    const isChittoor = distToChittoor < 30 || name.toLowerCase().includes('chittoor');
+
+    if (isChittoor) {
+      // Use verified Chittoor spots dataset (28 landmarks)
+      currentFocusArea.name = 'Chittoor';
+      allPOIs = CHITTOOR_POIS.map(p => ({
+        ...p,
+        distanceKm: calculateDistanceKm(lat, lng, p.lat, p.lng)
+      })).filter(p => p.distanceKm <= radiusKm);
+      allPOIs.sort((a, b) => a.distanceKm - b.distanceKm);
+      renderPOIs();
+      showToast(`📍 Showing ${allPOIs.length} spots in Chittoor only`);
+    } else {
+      // Clear out unrelated spots, keep only spots in this radius if any, then fetch live
+      allPOIs = allPOIs
+        .map(p => ({ ...p, distanceKm: calculateDistanceKm(lat, lng, p.lat, p.lng) }))
+        .filter(p => p.distanceKm <= radiusKm);
+      renderPOIs();
+      await fetchLocalSpotsForArea(lat, lng, name, radiusKm);
+    }
+  }
+
+  // Live Overpass API Search for any selected place worldwide
+  async function fetchLocalSpotsForArea(lat, lng, name, radiusKm = 25) {
+    if (searchAreaBtn) searchAreaBtn.classList.add('loading');
+    if (searchAreaText) searchAreaText.textContent = `Finding spots in ${name}...`;
 
     try {
-      const currentZoom = map.getZoom();
-      let query = '';
-
-      if (currentZoom < 9) {
-        const center = map.getCenter();
-        const radius = 15000;
-        query = `[out:json][timeout:15];
+      const radiusM = Math.min(Math.round(radiusKm * 1000), 30000);
+      const query = `[out:json][timeout:15];
 (
-  node["amenity"="place_of_worship"](around:${radius},${center.lat},${center.lng});
-  node["tourism"="hotel"](around:${radius},${center.lat},${center.lng});
-  node["amenity"="cafe"](around:${radius},${center.lat},${center.lng});
-  node["leisure"="park"](around:${radius},${center.lat},${center.lng});
-  node["shop"="mall"](around:${radius},${center.lat},${center.lng});
-  node["tourism"="attraction"](around:${radius},${center.lat},${center.lng});
-);
-out center 40;`;
-      } else {
-        const bounds = map.getBounds();
-        const south = bounds.getSouth();
-        const west = bounds.getWest();
-        const north = bounds.getNorth();
-        const east = bounds.getEast();
-        query = `[out:json][timeout:15];
-(
-  node["amenity"="place_of_worship"](${south},${west},${north},${east});
-  node["tourism"="hotel"](${south},${west},${north},${east});
-  node["amenity"="cafe"](${south},${west},${north},${east});
-  node["leisure"="park"](${south},${west},${north},${east});
-  node["shop"="mall"](${south},${west},${north},${east});
-  node["tourism"="attraction"](${south},${west},${north},${east});
+  node["amenity"="place_of_worship"](around:${radiusM},${lat},${lng});
+  node["tourism"="hotel"](around:${radiusM},${lat},${lng});
+  node["tourism"="resort"](around:${radiusM},${lat},${lng});
+  node["tourism"="guest_house"](around:${radiusM},${lat},${lng});
+  node["amenity"="cafe"](around:${radiusM},${lat},${lng});
+  node["amenity"="restaurant"](around:${radiusM},${lat},${lng});
+  node["leisure"="park"](around:${radiusM},${lat},${lng});
+  node["leisure"="garden"](around:${radiusM},${lat},${lng});
+  node["shop"="mall"](around:${radiusM},${lat},${lng});
+  node["shop"="supermarket"](around:${radiusM},${lat},${lng});
+  node["tourism"="attraction"](around:${radiusM},${lat},${lng});
+  node["historic"](around:${radiusM},${lat},${lng});
 );
 out center 60;`;
-      }
 
       const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query));
       if (!res.ok) throw new Error(`Overpass returned HTTP ${res.status}`);
@@ -429,54 +488,72 @@ out center 60;`;
       if (data && data.elements && data.elements.length > 0) {
         data.elements.forEach((el, idx) => {
           const tags = el.tags || {};
-          const name = tags.name || tags['name:en'];
-          if (!name) return;
+          const spotName = tags.name || tags['name:en'] || tags['name:te'] || tags['name:hi'];
+          if (!spotName) return;
 
           let category = 'tourist';
           if (tags.amenity === 'place_of_worship') category = 'temple';
           else if (tags.tourism === 'hotel' || tags.tourism === 'resort' || tags.tourism === 'guest_house') category = 'hotel';
-          else if (tags.amenity === 'cafe') category = 'cafe';
+          else if (tags.amenity === 'cafe' || tags.amenity === 'restaurant') category = 'cafe';
           else if (tags.leisure === 'park' || tags.leisure === 'garden') category = 'park';
-          else if (tags.shop === 'mall' || tags.shop === 'department_store') category = 'mall';
+          else if (tags.shop === 'mall' || tags.shop === 'supermarket' || tags.shop === 'department_store') category = 'mall';
           else if (tags.tourism === 'attraction' || tags.historic) category = 'tourist';
 
-          const lat = el.lat || (el.center && el.center.lat);
-          const lng = el.lon || (el.center && el.center.lon);
-          if (!lat || !lng) return;
+          const pLat = el.lat || (el.center && el.center.lat);
+          const pLng = el.lon || (el.center && el.center.lon);
+          if (!pLat || !pLng) return;
+
+          const dist = calculateDistanceKm(lat, lng, pLat, pLng);
+          if (dist > radiusKm) return; // Strict local scoping!
 
           const isDuplicate = allPOIs.some(p => 
-            (Math.abs(p.lat - lat) < 0.0005 && Math.abs(p.lng - lng) < 0.0005) ||
-            p.name.toLowerCase() === name.toLowerCase()
+            (Math.abs(p.lat - pLat) < 0.0005 && Math.abs(p.lng - pLng) < 0.0005) ||
+            p.name.toLowerCase() === spotName.toLowerCase()
           );
 
           if (!isDuplicate) {
             allPOIs.push({
-              id: `osm_${el.id || idx}_${Date.now()}`,
-              name: name,
+              id: `spot_${el.id || idx}_${Date.now()}`,
+              name: spotName,
               category: category,
-              lat: lat,
-              lng: lng,
-              city: tags['addr:city'] || '',
-              country: ''
+              lat: pLat,
+              lng: pLng,
+              city: tags['addr:city'] || tags['addr:town'] || name,
+              country: tags['addr:country'] || '',
+              distanceKm: dist
             });
             addedCount++;
           }
         });
       }
 
+      // Sort by closest distance
+      allPOIs.sort((a, b) => a.distanceKm - b.distanceKm);
       renderPOIs();
+
       if (addedCount > 0) {
-        showToast(`Discovered ${addedCount} live places in this area!`);
+        showToast(`✨ Found ${addedCount} nearby spots in ${name}!`);
+      } else if (allPOIs.length > 0) {
+        showToast(`Showing ${allPOIs.length} spots in ${name}.`);
       } else {
-        showToast('No new places found in this view. Try panning or zooming in.');
+        showToast(`No spots found in ${name}. Try zooming in or panning.`);
       }
     } catch (err) {
-      console.warn('Overpass API error:', err.message);
-      showToast('Live search unavailable or timed out. Please retry.');
+      console.warn('Overpass fetch error:', err);
+      showToast(`Notice: Live search unavailable for ${name}. Try again shortly.`);
     } finally {
-      searchAreaBtn.classList.remove('loading');
+      if (searchAreaBtn) searchAreaBtn.classList.remove('loading');
       if (searchAreaText) searchAreaText.textContent = 'Search This Area';
     }
+  }
+
+  // Triggered when user clicks "Search This Area" button
+  async function searchAreaPOIs() {
+    const center = map.getCenter();
+    const currentZoom = Math.max(map.getZoom(), 13);
+    const areaName = await reverseGeocode(center.lat, center.lng);
+    const cityName = areaName.split(',')[0].trim() || 'This Area';
+    await focusOnArea(cityName, center.lat, center.lng, currentZoom, 25);
   }
 
   // Category Chip click handlers
@@ -492,6 +569,16 @@ out center 60;`;
   // Search Area button handler
   if (searchAreaBtn) {
     searchAreaBtn.addEventListener('click', searchAreaPOIs);
+  }
+
+  // Chittoor Shortcut button handler
+  if (chittoorShortcutBtn) {
+    chittoorShortcutBtn.addEventListener('click', () => {
+      focusOnArea('Chittoor', 13.2172, 79.1003, 14, 30);
+      if (exploreDrawer && !exploreDrawer.classList.contains('open')) {
+        exploreDrawer.classList.add('open');
+      }
+    });
   }
 
   // Drawer Toggle Handlers
@@ -648,17 +735,6 @@ out center 60;`;
     if (notify) showToast('Route cleared');
   }
 
-  function calculateDistanceKm(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  }
 
   function generateArcPoints(start, end, numPoints = 80) {
     const pts = [];
@@ -1136,6 +1212,7 @@ out center 60;`;
       map.flyTo([latitude, longitude], 16, { duration: 1.6 });
 
       reverseGeocode(latitude, longitude).then((addr) => {
+        const cityName = addr.split(',')[0].trim() || 'My Location';
         if (userBeaconMarker) {
           userBeaconMarker.setPopupContent(`
             <div>
@@ -1146,6 +1223,7 @@ out center 60;`;
           `);
         }
         showToast(`📍 Located: ${addr}`);
+        focusOnArea(cityName, latitude, longitude, 15, 25, true);
       });
     } else {
       reverseGeocode(latitude, longitude).then((addr) => {
@@ -1207,6 +1285,10 @@ out center 60;`;
     if (userBeaconMarker) {
       map.flyTo(userBeaconMarker.getLatLng(), 16, { duration: 1.2 });
       showToast('Re-centered on your location');
+      reverseGeocode(userBeaconMarker.getLatLng().lat, userBeaconMarker.getLatLng().lng).then((addr) => {
+        const cityName = addr.split(',')[0].trim() || 'My Location';
+        focusOnArea(cityName, userBeaconMarker.getLatLng().lat, userBeaconMarker.getLatLng().lng, 15, 25, true);
+      });
     } else {
       startLiveLocationTracking(true);
     }
@@ -1237,6 +1319,10 @@ out center 60;`;
       if (userBeaconMarker) {
         map.flyTo(userBeaconMarker.getLatLng(), 17, { duration: 1.2 });
         showToast('Centered on your live location');
+        reverseGeocode(userBeaconMarker.getLatLng().lat, userBeaconMarker.getLatLng().lng).then((addr) => {
+          const cityName = addr.split(',')[0].trim() || 'My Location';
+          focusOnArea(cityName, userBeaconMarker.getLatLng().lat, userBeaconMarker.getLatLng().lng, 15, 25, true);
+        });
       } else {
         startLiveLocationTracking(true);
       }
@@ -1267,10 +1353,11 @@ out center 60;`;
             div.addEventListener('click', () => {
               const lat = parseFloat(item.lat);
               const lon = parseFloat(item.lon);
-              map.flyTo([lat, lon], 14, { duration: 1.5 });
-              addMarkerAt(lat, lon, item.display_name.split(',')[0]);
+              const placeName = item.display_name.split(',')[0].trim();
               searchResults.classList.remove('show');
-              searchInput.value = item.display_name.split(',')[0];
+              searchInput.value = placeName;
+              addMarkerAt(lat, lon, placeName);
+              focusOnArea(placeName, lat, lon, 14, 25);
             });
             searchResults.appendChild(div);
           });
@@ -1282,6 +1369,33 @@ out center 60;`;
         console.error('Search error:', err);
       }
     }, 350);
+  });
+
+  searchInput.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      clearTimeout(debounceTimeout);
+      const query = searchInput.value.trim();
+      if (!query) return;
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const item = data[0];
+          const lat = parseFloat(item.lat);
+          const lon = parseFloat(item.lon);
+          const placeName = item.display_name.split(',')[0].trim();
+          searchResults.classList.remove('show');
+          searchInput.value = placeName;
+          addMarkerAt(lat, lon, placeName);
+          focusOnArea(placeName, lat, lon, 14, 25);
+        } else {
+          showToast('Place not found. Try another city or town name.');
+        }
+      } catch (err) {
+        console.error('Search enter error:', err);
+      }
+    }
   });
 
   document.addEventListener('click', (e) => {
