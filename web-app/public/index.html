@@ -70,6 +70,82 @@
       <!-- Map Container -->
       <div id="map" class="map-view"></div>
 
+      <!-- POI Category Filter Bar -->
+      <div class="poi-category-bar">
+        <button class="poi-chip active" data-category="all">
+          <span class="poi-chip-icon">✨</span>
+          <span>All Places</span>
+          <span class="poi-count" id="count-all">0</span>
+        </button>
+        <button class="poi-chip" data-category="temple">
+          <span class="poi-chip-icon">🛕</span>
+          <span>Temples</span>
+          <span class="poi-count" id="count-temple">0</span>
+        </button>
+        <button class="poi-chip" data-category="hotel">
+          <span class="poi-chip-icon">🏨</span>
+          <span>Hotels</span>
+          <span class="poi-count" id="count-hotel">0</span>
+        </button>
+        <button class="poi-chip" data-category="cafe">
+          <span class="poi-chip-icon">☕</span>
+          <span>Cafes</span>
+          <span class="poi-count" id="count-cafe">0</span>
+        </button>
+        <button class="poi-chip" data-category="park">
+          <span class="poi-chip-icon">🌳</span>
+          <span>Parks</span>
+          <span class="poi-count" id="count-park">0</span>
+        </button>
+        <button class="poi-chip" data-category="mall">
+          <span class="poi-chip-icon">🛍️</span>
+          <span>Malls</span>
+          <span class="poi-count" id="count-mall">0</span>
+        </button>
+        <button class="poi-chip" data-category="tourist">
+          <span class="poi-chip-icon">🏛️</span>
+          <span>Tourist Sights</span>
+          <span class="poi-count" id="count-tourist">0</span>
+        </button>
+        <button id="searchAreaBtn" class="poi-chip poi-chip-action" title="Scan and load temples, hotels, cafes & attractions in this area">
+          <svg class="search-area-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span id="searchAreaText">Search This Area</span>
+        </button>
+      </div>
+
+      <!-- Toggle Explore Drawer Button -->
+      <button id="toggleExploreBtn" class="floating-explore-toggle" title="View Places List">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Explore Places (<span id="explorePlacesBadge">0</span>)</span>
+      </button>
+
+      <!-- Explore Places Sidebar Drawer -->
+      <div id="exploreDrawer" class="explore-drawer">
+        <div class="explore-drawer-header">
+          <div class="explore-title-box">
+            <h3 id="exploreDrawerTitle">All Places</h3>
+            <span id="exploreDrawerSubtitle" class="explore-subtitle">Discovered POIs</span>
+          </div>
+          <button id="closeExploreBtn" class="explore-close-btn" title="Close">&times;</button>
+        </div>
+
+        <div class="explore-search-box">
+          <input type="text" id="exploreFilterInput" placeholder="Filter places by name..." autocomplete="off">
+        </div>
+
+        <div id="explorePlacesList" class="explore-places-list">
+          <!-- Dynamically populated cards -->
+        </div>
+      </div>
+
       <!-- Floating Map Layer Selector -->
       <div class="floating-layers-dock">
         <button class="layer-pill active" data-layer="googleRoads">Google 2026 Streets</button>

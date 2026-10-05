@@ -80,7 +80,454 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.getElementById('searchInput');
   const searchResults = document.getElementById('searchResults');
   const locateBtn = document.getElementById('locateBtn');
-  const toast = document.getElementById('toast');
+  // Toast helper
+  function showToast(msg) {
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>'"]/g, 
+      tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+  }
+
+  // ============================================================
+  // POINTS OF INTEREST (POIs) ENGINE
+  // Temples, Hotels, Cafes, Parks, Malls & Tourist Sights
+  // ============================================================
+  const POI_CATEGORIES = {
+    temple: {
+      id: 'temple',
+      label: 'Temple',
+      plural: 'Temples',
+      emoji: '🛕',
+      color: '#f59e0b',
+      bg: 'linear-gradient(135deg, #f59e0b, #d97706)'
+    },
+    hotel: {
+      id: 'hotel',
+      label: 'Hotel',
+      plural: 'Hotels',
+      emoji: '🏨',
+      color: '#8b5cf6',
+      bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)'
+    },
+    cafe: {
+      id: 'cafe',
+      label: 'Cafe',
+      plural: 'Cafes',
+      emoji: '☕',
+      color: '#ec4899',
+      bg: 'linear-gradient(135deg, #ec4899, #db2777)'
+    },
+    park: {
+      id: 'park',
+      label: 'Park',
+      plural: 'Parks',
+      emoji: '🌳',
+      color: '#10b981',
+      bg: 'linear-gradient(135deg, #10b981, #059669)'
+    },
+    mall: {
+      id: 'mall',
+      label: 'Mall',
+      plural: 'Shopping Malls',
+      emoji: '🛍️',
+      color: '#3b82f6',
+      bg: 'linear-gradient(135deg, #3b82f6, #2563eb)'
+    },
+    tourist: {
+      id: 'tourist',
+      label: 'Tourist Sight',
+      plural: 'Tourist Sights',
+      emoji: '🏛️',
+      color: '#06b6d4',
+      bg: 'linear-gradient(135deg, #06b6d4, #0891b2)'
+    }
+  };
+
+  const INITIAL_POIS = [
+    // --- TEMPLES 🛕 ---
+    { id: 't1', name: 'Angkor Wat', category: 'temple', lat: 13.4125, lng: 103.8670, city: 'Siem Reap', country: 'Cambodia' },
+    { id: 't2', name: 'Meenakshi Amman Temple', category: 'temple', lat: 9.9195, lng: 78.1194, city: 'Madurai', country: 'India' },
+    { id: 't3', name: 'Golden Temple (Harmandir Sahib)', category: 'temple', lat: 31.6200, lng: 74.8765, city: 'Amritsar', country: 'India' },
+    { id: 't4', name: 'Tirumala Venkateswara Temple', category: 'temple', lat: 13.6833, lng: 79.3472, city: 'Tirupati', country: 'India' },
+    { id: 't5', name: 'Senso-ji Temple', category: 'temple', lat: 35.7148, lng: 139.7967, city: 'Tokyo', country: 'Japan' },
+    { id: 't6', name: 'Kashi Vishwanath Temple', category: 'temple', lat: 25.3109, lng: 83.0107, city: 'Varanasi', country: 'India' },
+    { id: 't7', name: 'Brihadisvara Temple', category: 'temple', lat: 10.7828, lng: 79.1318, city: 'Thanjavur', country: 'India' },
+    { id: 't8', name: 'Wat Pho (Reclining Buddha)', category: 'temple', lat: 13.7465, lng: 100.4930, city: 'Bangkok', country: 'Thailand' },
+    { id: 't9', name: 'Swaminarayan Akshardham', category: 'temple', lat: 28.6127, lng: 77.2773, city: 'New Delhi', country: 'India' },
+    { id: 't10', name: 'Prambanan Temple', category: 'temple', lat: -7.7520, lng: 110.4915, city: 'Yogyakarta', country: 'Indonesia' },
+    { id: 't11', name: 'Somnath Temple', category: 'temple', lat: 20.8880, lng: 70.4013, city: 'Prabhas Patan', country: 'India' },
+    { id: 't12', name: 'Batu Caves Murugan Temple', category: 'temple', lat: 3.2379, lng: 101.6840, city: 'Gombak', country: 'Malaysia' },
+
+    // --- HOTELS 🏨 ---
+    { id: 'h1', name: 'Burj Al Arab', category: 'hotel', lat: 25.1412, lng: 55.1852, city: 'Dubai', country: 'UAE' },
+    { id: 'h2', name: 'Marina Bay Sands', category: 'hotel', lat: 1.2834, lng: 103.8607, city: 'Downtown', country: 'Singapore' },
+    { id: 'h3', name: 'The Taj Mahal Palace', category: 'hotel', lat: 18.9217, lng: 72.8332, city: 'Mumbai', country: 'India' },
+    { id: 'h4', name: 'The Plaza Hotel', category: 'hotel', lat: 40.7644, lng: -73.9745, city: 'New York', country: 'USA' },
+    { id: 'h5', name: 'The Ritz Paris', category: 'hotel', lat: 48.8682, lng: 2.3292, city: 'Paris', country: 'France' },
+    { id: 'h6', name: 'The Beverly Hills Hotel', category: 'hotel', lat: 34.0818, lng: -118.4136, city: 'Beverly Hills', country: 'USA' },
+    { id: 'h7', name: 'The Leela Palace', category: 'hotel', lat: 12.9606, lng: 77.6484, city: 'Bengaluru', country: 'India' },
+    { id: 'h8', name: 'Atlantis The Palm', category: 'hotel', lat: 25.1304, lng: 55.1171, city: 'Dubai', country: 'UAE' },
+
+    // --- CAFES ☕ ---
+    { id: 'c1', name: 'Café de Flore', category: 'cafe', lat: 48.8540, lng: 2.3326, city: 'Paris', country: 'France' },
+    { id: 'c2', name: 'Caffè Florian', category: 'cafe', lat: 45.4337, lng: 12.3384, city: 'Venice', country: 'Italy' },
+    { id: 'c3', name: 'The Grounds of Alexandria', category: 'cafe', lat: -33.9108, lng: 151.1942, city: 'Sydney', country: 'Australia' },
+    { id: 'c4', name: 'Confeitaria Colombo', category: 'cafe', lat: -22.9067, lng: -43.1782, city: 'Rio de Janeiro', country: 'Brazil' },
+    { id: 'c5', name: 'Indian Coffee House', category: 'cafe', lat: 22.5756, lng: 88.3636, city: 'Kolkata', country: 'India' },
+    { id: 'c6', name: 'Blue Bottle Coffee Shibuya', category: 'cafe', lat: 35.6628, lng: 139.7013, city: 'Tokyo', country: 'Japan' },
+    { id: 'c7', name: 'Third Wave Coffee Koramangala', category: 'cafe', lat: 12.9352, lng: 77.6245, city: 'Bengaluru', country: 'India' },
+    { id: 'c8', name: 'Café Central', category: 'cafe', lat: 48.2104, lng: 16.3653, city: 'Vienna', country: 'Austria' },
+
+    // --- PARKS 🌳 ---
+    { id: 'p1', name: 'Central Park', category: 'park', lat: 40.7851, lng: -73.9683, city: 'New York', country: 'USA' },
+    { id: 'p2', name: 'Hyde Park', category: 'park', lat: 51.5073, lng: -0.1657, city: 'London', country: 'UK' },
+    { id: 'p3', name: 'Cubbon Park', category: 'park', lat: 12.9763, lng: 77.5929, city: 'Bengaluru', country: 'India' },
+    { id: 'p4', name: 'Ueno Park', category: 'park', lat: 35.7153, lng: 139.7739, city: 'Tokyo', country: 'Japan' },
+    { id: 'p5', name: 'Lodhi Garden', category: 'park', lat: 28.5933, lng: 77.2197, city: 'New Delhi', country: 'India' },
+    { id: 'p6', name: 'Golden Gate Park', category: 'park', lat: 37.7694, lng: -122.4862, city: 'San Francisco', country: 'USA' },
+    { id: 'p7', name: 'Gardens by the Bay', category: 'park', lat: 1.2816, lng: 103.8636, city: 'Marina South', country: 'Singapore' },
+    { id: 'p8', name: 'Lalbagh Botanical Garden', category: 'park', lat: 12.9507, lng: 77.5848, city: 'Bengaluru', country: 'India' },
+
+    // --- SHOPPING MALLS 🛍️ ---
+    { id: 'm1', name: 'The Dubai Mall', category: 'mall', lat: 25.1972, lng: 55.2796, city: 'Dubai', country: 'UAE' },
+    { id: 'm2', name: 'Mall of America', category: 'mall', lat: 44.8549, lng: -93.2422, city: 'Bloomington', country: 'USA' },
+    { id: 'm3', name: 'Siam Paragon', category: 'mall', lat: 13.7466, lng: 100.5350, city: 'Bangkok', country: 'Thailand' },
+    { id: 'm4', name: 'Phoenix Marketcity', category: 'mall', lat: 12.9961, lng: 77.6966, city: 'Bengaluru', country: 'India' },
+    { id: 'm5', name: 'Harrods', category: 'mall', lat: 51.4994, lng: -0.1633, city: 'London', country: 'UK' },
+    { id: 'm6', name: 'Galeries Lafayette', category: 'mall', lat: 48.8732, lng: 2.3323, city: 'Paris', country: 'France' },
+    { id: 'm7', name: 'High Street Phoenix & Palladium', category: 'mall', lat: 18.9953, lng: 72.8242, city: 'Mumbai', country: 'India' },
+    { id: 'm8', name: 'Select CITYWALK', category: 'mall', lat: 28.5285, lng: 77.2189, city: 'New Delhi', country: 'India' },
+
+    // --- TOURIST SIGHTS 🏛️ ---
+    { id: 's1', name: 'Taj Mahal', category: 'tourist', lat: 27.1751, lng: 78.0421, city: 'Agra', country: 'India' },
+    { id: 's2', name: 'Eiffel Tower', category: 'tourist', lat: 48.8584, lng: 2.2945, city: 'Paris', country: 'France' },
+    { id: 's3', name: 'Colosseum', category: 'tourist', lat: 41.8902, lng: 12.4922, city: 'Rome', country: 'Italy' },
+    { id: 's4', name: 'Great Pyramid of Giza', category: 'tourist', lat: 29.9792, lng: 31.1342, city: 'Giza', country: 'Egypt' },
+    { id: 's5', name: 'Statue of Liberty', category: 'tourist', lat: 40.6892, lng: -74.0445, city: 'New York', country: 'USA' },
+    { id: 's6', name: 'Machu Picchu', category: 'tourist', lat: -13.1631, lng: -72.5450, city: 'Cusco', country: 'Peru' },
+    { id: 's7', name: 'Sydney Opera House', category: 'tourist', lat: -33.8568, lng: 151.2153, city: 'Sydney', country: 'Australia' },
+    { id: 's8', name: 'Gateway of India', category: 'tourist', lat: 18.9220, lng: 72.8347, city: 'Mumbai', country: 'India' }
+  ];
+
+  let allPOIs = [...INITIAL_POIS];
+  let activeCategory = 'all';
+  const poiLayerGroup = L.layerGroup().addTo(map);
+  const activeMarkersMap = {};
+
+  // Elements
+  const poiCategoryChips = document.querySelectorAll('.poi-chip[data-category]');
+  const searchAreaBtn = document.getElementById('searchAreaBtn');
+  const searchAreaText = document.getElementById('searchAreaText');
+  const toggleExploreBtn = document.getElementById('toggleExploreBtn');
+  const closeExploreBtn = document.getElementById('closeExploreBtn');
+  const exploreDrawer = document.getElementById('exploreDrawer');
+  const explorePlacesList = document.getElementById('explorePlacesList');
+  const exploreFilterInput = document.getElementById('exploreFilterInput');
+  const exploreDrawerTitle = document.getElementById('exploreDrawerTitle');
+  const explorePlacesBadge = document.getElementById('explorePlacesBadge');
+
+  // Count Elements
+  const countElems = {
+    all: document.getElementById('count-all'),
+    temple: document.getElementById('count-temple'),
+    hotel: document.getElementById('count-hotel'),
+    cafe: document.getElementById('count-cafe'),
+    park: document.getElementById('count-park'),
+    mall: document.getElementById('count-mall'),
+    tourist: document.getElementById('count-tourist')
+  };
+
+  function createPOIMarkerIcon(category) {
+    const meta = POI_CATEGORIES[category] || { emoji: '📍', color: '#6366f1', bg: 'linear-gradient(135deg, #6366f1, #4f46e5)' };
+    return L.divIcon({
+      className: 'custom-poi-pin',
+      html: `
+        <div class="poi-pin-bubble" style="background: ${meta.bg}; box-shadow: 0 4px 14px rgba(0,0,0,0.5), 0 0 16px ${meta.color}77;">
+          <span class="poi-pin-emoji">${meta.emoji}</span>
+        </div>
+      `,
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -34]
+    });
+  }
+
+  function createPOIPopupContent(poi) {
+    const meta = POI_CATEGORIES[poi.category] || { label: 'Place', emoji: '📍', color: '#6366f1' };
+    return `
+      <div class="poi-popup-card">
+        <div class="poi-popup-badge" style="background: ${meta.color}22; color: ${meta.color}; border: 1px solid ${meta.color}55;">
+          <span>${meta.emoji}</span>
+          <span>${meta.label}</span>
+        </div>
+        <div class="poi-popup-title">${escapeHTML(poi.name)}</div>
+        <div class="poi-popup-coords">${poi.lat.toFixed(5)}, ${poi.lng.toFixed(5)}</div>
+        ${poi.city ? `<div style="font-size: 11.5px; color: #cbd5e1;">📍 ${escapeHTML(poi.city)}${poi.country ? ', ' + escapeHTML(poi.country) : ''}</div>` : ''}
+        <div class="poi-popup-actions">
+          <button class="poi-popup-btn poi-zoom-btn" data-lat="${poi.lat}" data-lng="${poi.lng}">📍 Zoom In</button>
+          <a class="poi-popup-btn" href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}" target="_blank" rel="noopener">🗺️ Google Maps</a>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPOIs() {
+    poiLayerGroup.clearLayers();
+    Object.keys(activeMarkersMap).forEach(key => delete activeMarkersMap[key]);
+
+    // Calculate category counts
+    const counts = { all: allPOIs.length, temple: 0, hotel: 0, cafe: 0, park: 0, mall: 0, tourist: 0 };
+    allPOIs.forEach(p => {
+      if (counts[p.category] !== undefined) counts[p.category]++;
+    });
+
+    Object.keys(counts).forEach(cat => {
+      if (countElems[cat]) countElems[cat].textContent = counts[cat];
+    });
+
+    if (explorePlacesBadge) {
+      explorePlacesBadge.textContent = activeCategory === 'all' ? counts.all : counts[activeCategory] || 0;
+    }
+
+    // Filter places
+    const filterQuery = (exploreFilterInput?.value || '').toLowerCase().trim();
+    const visiblePlaces = allPOIs.filter(p => {
+      const matchesCategory = activeCategory === 'all' || p.category === activeCategory;
+      const matchesSearch = !filterQuery || p.name.toLowerCase().includes(filterQuery) || (p.city && p.city.toLowerCase().includes(filterQuery));
+      return matchesCategory && matchesSearch;
+    });
+
+    // Add markers to map
+    visiblePlaces.forEach(poi => {
+      const marker = L.marker([poi.lat, poi.lng], {
+        icon: createPOIMarkerIcon(poi.category),
+        title: poi.name
+      });
+      marker.bindPopup(createPOIPopupContent(poi));
+      marker.addTo(poiLayerGroup);
+      activeMarkersMap[poi.id] = marker;
+    });
+
+    // Update Drawer Title
+    if (exploreDrawerTitle) {
+      if (activeCategory === 'all') {
+        exploreDrawerTitle.textContent = `All Places (${visiblePlaces.length})`;
+      } else {
+        const catMeta = POI_CATEGORIES[activeCategory];
+        exploreDrawerTitle.textContent = `${catMeta ? catMeta.emoji + ' ' + catMeta.plural : 'Places'} (${visiblePlaces.length})`;
+      }
+    }
+
+    // Update Explore Drawer Cards
+    if (explorePlacesList) {
+      if (visiblePlaces.length === 0) {
+        explorePlacesList.innerHTML = `
+          <div class="poi-empty-state">
+            <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+            <p>No places found in this view.</p>
+            <button class="btn btn-sm btn-primary" id="drawerSearchAreaBtn" style="margin-top: 12px;">Search This Area</button>
+          </div>
+        `;
+        const drawerBtn = document.getElementById('drawerSearchAreaBtn');
+        if (drawerBtn) drawerBtn.addEventListener('click', searchAreaPOIs);
+      } else {
+        explorePlacesList.innerHTML = visiblePlaces.map(poi => {
+          const meta = POI_CATEGORIES[poi.category] || { emoji: '📍', color: '#6366f1', label: 'Place', bg: '#6366f1' };
+          return `
+            <div class="poi-card" data-id="${poi.id}" data-lat="${poi.lat}" data-lng="${poi.lng}">
+              <div class="poi-card-icon" style="background: ${meta.bg};">
+                ${meta.emoji}
+              </div>
+              <div class="poi-card-content">
+                <div class="poi-card-name">${escapeHTML(poi.name)}</div>
+                <div class="poi-card-meta">
+                  <span class="poi-card-category" style="color: ${meta.color};">${meta.label}</span>
+                  ${poi.city ? `<span>• ${escapeHTML(poi.city)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        // Attach card click handlers
+        explorePlacesList.querySelectorAll('.poi-card').forEach(card => {
+          card.addEventListener('click', () => {
+            const id = card.dataset.id;
+            const lat = parseFloat(card.dataset.lat);
+            const lng = parseFloat(card.dataset.lng);
+            map.flyTo([lat, lng], 16, { duration: 1.4 });
+
+            setTimeout(() => {
+              const marker = activeMarkersMap[id];
+              if (marker) marker.openPopup();
+            }, 700);
+
+            if (window.innerWidth < 768 && exploreDrawer) {
+              exploreDrawer.classList.remove('open');
+            }
+          });
+        });
+      }
+    }
+  }
+
+  // Live Overpass API Search
+  async function searchAreaPOIs() {
+    if (!searchAreaBtn) return;
+    searchAreaBtn.classList.add('loading');
+    if (searchAreaText) searchAreaText.textContent = 'Searching...';
+
+    try {
+      const currentZoom = map.getZoom();
+      let query = '';
+
+      if (currentZoom < 9) {
+        const center = map.getCenter();
+        const radius = 15000;
+        query = `[out:json][timeout:15];
+(
+  node["amenity"="place_of_worship"](around:${radius},${center.lat},${center.lng});
+  node["tourism"="hotel"](around:${radius},${center.lat},${center.lng});
+  node["amenity"="cafe"](around:${radius},${center.lat},${center.lng});
+  node["leisure"="park"](around:${radius},${center.lat},${center.lng});
+  node["shop"="mall"](around:${radius},${center.lat},${center.lng});
+  node["tourism"="attraction"](around:${radius},${center.lat},${center.lng});
+);
+out center 40;`;
+      } else {
+        const bounds = map.getBounds();
+        const south = bounds.getSouth();
+        const west = bounds.getWest();
+        const north = bounds.getNorth();
+        const east = bounds.getEast();
+        query = `[out:json][timeout:15];
+(
+  node["amenity"="place_of_worship"](${south},${west},${north},${east});
+  node["tourism"="hotel"](${south},${west},${north},${east});
+  node["amenity"="cafe"](${south},${west},${north},${east});
+  node["leisure"="park"](${south},${west},${north},${east});
+  node["shop"="mall"](${south},${west},${north},${east});
+  node["tourism"="attraction"](${south},${west},${north},${east});
+);
+out center 60;`;
+      }
+
+      const res = await fetch('https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(query));
+      if (!res.ok) throw new Error(`Overpass returned HTTP ${res.status}`);
+      const data = await res.json();
+
+      let addedCount = 0;
+      if (data && data.elements && data.elements.length > 0) {
+        data.elements.forEach((el, idx) => {
+          const tags = el.tags || {};
+          const name = tags.name || tags['name:en'];
+          if (!name) return;
+
+          let category = 'tourist';
+          if (tags.amenity === 'place_of_worship') category = 'temple';
+          else if (tags.tourism === 'hotel' || tags.tourism === 'resort' || tags.tourism === 'guest_house') category = 'hotel';
+          else if (tags.amenity === 'cafe') category = 'cafe';
+          else if (tags.leisure === 'park' || tags.leisure === 'garden') category = 'park';
+          else if (tags.shop === 'mall' || tags.shop === 'department_store') category = 'mall';
+          else if (tags.tourism === 'attraction' || tags.historic) category = 'tourist';
+
+          const lat = el.lat || (el.center && el.center.lat);
+          const lng = el.lon || (el.center && el.center.lon);
+          if (!lat || !lng) return;
+
+          const isDuplicate = allPOIs.some(p => 
+            (Math.abs(p.lat - lat) < 0.0005 && Math.abs(p.lng - lng) < 0.0005) ||
+            p.name.toLowerCase() === name.toLowerCase()
+          );
+
+          if (!isDuplicate) {
+            allPOIs.push({
+              id: `osm_${el.id || idx}_${Date.now()}`,
+              name: name,
+              category: category,
+              lat: lat,
+              lng: lng,
+              city: tags['addr:city'] || '',
+              country: ''
+            });
+            addedCount++;
+          }
+        });
+      }
+
+      renderPOIs();
+      if (addedCount > 0) {
+        showToast(`Discovered ${addedCount} live places in this area!`);
+      } else {
+        showToast('No new places found in this view. Try panning or zooming in.');
+      }
+    } catch (err) {
+      console.warn('Overpass API error:', err.message);
+      showToast('Live search unavailable or timed out. Please retry.');
+    } finally {
+      searchAreaBtn.classList.remove('loading');
+      if (searchAreaText) searchAreaText.textContent = 'Search This Area';
+    }
+  }
+
+  // Category Chip click handlers
+  poiCategoryChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      poiCategoryChips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      activeCategory = chip.dataset.category;
+      renderPOIs();
+    });
+  });
+
+  // Search Area button handler
+  if (searchAreaBtn) {
+    searchAreaBtn.addEventListener('click', searchAreaPOIs);
+  }
+
+  // Drawer Toggle Handlers
+  if (toggleExploreBtn && exploreDrawer) {
+    toggleExploreBtn.addEventListener('click', () => {
+      exploreDrawer.classList.toggle('open');
+    });
+  }
+
+  if (closeExploreBtn && exploreDrawer) {
+    closeExploreBtn.addEventListener('click', () => {
+      exploreDrawer.classList.remove('open');
+    });
+  }
+
+  // Filter input handler
+  if (exploreFilterInput) {
+    exploreFilterInput.addEventListener('input', () => {
+      renderPOIs();
+    });
+  }
+
+  // Popup Zoom In delegate
+  map.on('popupopen', (e) => {
+    const popupEl = e.popup.getElement();
+    if (!popupEl) return;
+    const zoomBtn = popupEl.querySelector('.poi-zoom-btn');
+    if (zoomBtn) {
+      zoomBtn.addEventListener('click', () => {
+        const lat = parseFloat(zoomBtn.dataset.lat);
+        const lng = parseFloat(zoomBtn.dataset.lng);
+        map.flyTo([lat, lng], 17, { duration: 1.2 });
+      });
+    }
+  });
+
+  // Initial POI Render
+  renderPOIs();
 
   // Custom Icon
   const createPinIcon = (color = '#6366f1') => {
