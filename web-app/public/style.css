@@ -1329,3 +1329,158 @@ body, html {
   border-color: var(--accent);
 }
 
+/* ============================================================
+   ROUTE & TRAVEL HUD STYLES
+   ============================================================ */
+.poi-chip-route {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+}
+
+.poi-chip-route:hover {
+  background: #6366f1;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
+}
+
+.route-travel-hud {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 1050;
+  width: min(420px, calc(100vw - 40px));
+  background: rgba(14, 18, 30, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 14px 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 24px rgba(99, 102, 241, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.route-travel-hud.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.route-hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.route-hud-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.route-badge-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #6366f1, #06b6d4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.route-hud-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.route-hud-details {
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+.route-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: all 0.18s ease;
+}
+
+.route-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.route-progress-bar-container {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin: 12px 0 10px 0;
+}
+
+.route-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #6366f1, #06b6d4, #10b981);
+  transition: width 0.08s linear;
+}
+
+.route-hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-point-marker {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-sans);
+}
+
+.route-point-start {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.8), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.route-point-end {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  box-shadow: 0 0 16px rgba(244, 63, 94, 0.8), 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.travel-vehicle-marker {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0f1422;
+  border: 2px solid #06b6d4;
+  box-shadow: 0 0 20px #06b6d4, 0 4px 14px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: transform 0.06s linear;
+}
+
+

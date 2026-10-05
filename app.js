@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     maxBounds: worldBounds,
     maxBoundsViscosity: 1.0,
     zoomControl: false,
+    doubleClickZoom: false,
     layers: [tileProviders.googleRoads]
   });
 
@@ -271,8 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="poi-popup-coords">${poi.lat.toFixed(5)}, ${poi.lng.toFixed(5)}</div>
         ${poi.city ? `<div style="font-size: 11.5px; color: #cbd5e1;">📍 ${escapeHTML(poi.city)}${poi.country ? ', ' + escapeHTML(poi.country) : ''}</div>` : ''}
         <div class="poi-popup-actions">
-          <button class="poi-popup-btn poi-zoom-btn" data-lat="${poi.lat}" data-lng="${poi.lng}">📍 Zoom In</button>
-          <a class="poi-popup-btn" href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}" target="_blank" rel="noopener">🗺️ Google Maps</a>
+          <button class="poi-popup-btn poi-zoom-btn" data-lat="${poi.lat}" data-lng="${poi.lng}">📍 Zoom</button>
+          <button class="poi-popup-btn poi-route-to-btn" data-lat="${poi.lat}" data-lng="${poi.lng}" data-name="${escapeHTML(poi.name)}">🚗 Route</button>
+          <a class="poi-popup-btn" href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lng}" target="_blank" rel="noopener">🗺️ Google</a>
         </div>
       </div>
     `;
@@ -524,10 +526,359 @@ out center 60;`;
         map.flyTo([lat, lng], 17, { duration: 1.2 });
       });
     }
+    // Route Here delegate from POI popup
+    const routeToBtn = popupEl.querySelector('.poi-route-to-btn');
+    if (routeToBtn) {
+      routeToBtn.addEventListener('click', () => {
+        const targetLat = parseFloat(routeToBtn.dataset.lat);
+        const targetLng = parseFloat(routeToBtn.dataset.lng);
+        const destLatLng = L.latLng(targetLat, targetLng);
+
+        if (userBeaconMarker) {
+          clearTravelRoute(false);
+          routeStartMarker = createRoutePointMarker(userBeaconMarker.getLatLng(), 'A');
+          routeEndMarker = createRoutePointMarker(destLatLng, 'B');
+          calculateAndDrawRoute(userBeaconMarker.getLatLng(), destLatLng);
+        } else if (routeStartMarker) {
+          if (routeEndMarker) map.removeLayer(routeEndMarker);
+          routeEndMarker = createRoutePointMarker(destLatLng, 'B');
+          calculateAndDrawRoute(routeStartMarker.getLatLng(), destLatLng);
+        } else {
+          routeEndMarker = createRoutePointMarker(destLatLng, 'B');
+          if (routeTravelHud) {
+            routeTravelHud.classList.add('show');
+            if (routeHudTitle) routeHudTitle.textContent = 'Destination Set 🏁';
+            if (routeHudDetails) routeHudDetails.textContent = 'Double-click anywhere on the map to set your Start location';
+          }
+          showToast('Destination set! Double-click on map to choose Start location.');
+        }
+      });
+    }
   });
 
   // Initial POI Render
   renderPOIs();
+
+  // ============================================================
+  // INTERACTIVE 2-PRESS ROUTE & TRAVEL ENGINE
+  // ============================================================
+  let routeStartMarker = null;
+  let routeEndMarker = null;
+  let currentRouteGroup = null;
+  let travelVehicleMarker = null;
+  let travelAnimTimer = null;
+  let routePathCoordinates = [];
+  let travelStepIndex = 0;
+  let travelSpeed = 1;
+  let isTraveling = false;
+
+  const routeTravelHud = document.getElementById('routeTravelHud');
+  const routeHudTitle = document.getElementById('routeHudTitle');
+  const routeHudDetails = document.getElementById('routeHudDetails');
+  const routeProgressBar = document.getElementById('routeProgressBar');
+  const startTravelBtn = document.getElementById('startTravelBtn');
+  const travelBtnIcon = document.getElementById('travelBtnIcon');
+  const travelBtnText = document.getElementById('travelBtnText');
+  const travelSpeedBtn = document.getElementById('travelSpeedBtn');
+  const clearRouteActionBtn = document.getElementById('clearRouteActionBtn');
+  const closeRouteBtn = document.getElementById('closeRouteBtn');
+  const routeModeChip = document.getElementById('routeModeChip');
+
+  function createRoutePointMarker(latlng, type = 'A') {
+    return L.marker(latlng, {
+      icon: L.divIcon({
+        className: 'route-point-marker-container',
+        html: `
+          <div class="route-point-marker ${type === 'A' ? 'route-point-start' : 'route-point-end'}">
+            ${type === 'A' ? '🟢 A' : '🏁 B'}
+          </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18],
+        popupAnchor: [0, -18]
+      }),
+      zIndexOffset: 1500
+    }).addTo(map);
+  }
+
+  function createTravelVehicleMarker(latlng) {
+    return L.marker(latlng, {
+      icon: L.divIcon({
+        className: 'travel-vehicle-marker-container',
+        html: `
+          <div id="activeCarMarker" class="travel-vehicle-marker">
+            🚗
+          </div>
+        `,
+        iconSize: [40, 40],
+        iconAnchor: [20, 20]
+      }),
+      zIndexOffset: 2000
+    }).addTo(map);
+  }
+
+  function clearTravelRoute(notify = true) {
+    stopTravelAnimation();
+
+    if (routeStartMarker) {
+      map.removeLayer(routeStartMarker);
+      routeStartMarker = null;
+    }
+    if (routeEndMarker) {
+      map.removeLayer(routeEndMarker);
+      routeEndMarker = null;
+    }
+    if (currentRouteGroup) {
+      map.removeLayer(currentRouteGroup);
+      currentRouteGroup = null;
+    }
+    if (travelVehicleMarker) {
+      map.removeLayer(travelVehicleMarker);
+      travelVehicleMarker = null;
+    }
+
+    routePathCoordinates = [];
+    travelStepIndex = 0;
+    isTraveling = false;
+
+    if (routeProgressBar) routeProgressBar.style.width = '0%';
+    if (routeTravelHud) routeTravelHud.classList.remove('show');
+    if (routeModeChip) routeModeChip.classList.remove('active');
+
+    if (notify) showToast('Route cleared');
+  }
+
+  function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  function generateArcPoints(start, end, numPoints = 80) {
+    const pts = [];
+    for (let i = 0; i <= numPoints; i++) {
+      const f = i / numPoints;
+      const lat = start.lat + (end.lat - start.lat) * f;
+      const lng = start.lng + (end.lng - start.lng) * f;
+      pts.push([lat, lng]);
+    }
+    return pts;
+  }
+
+  async function calculateAndDrawRoute(startLatLng, endLatLng) {
+    if (routeTravelHud) {
+      routeTravelHud.classList.add('show');
+      if (routeHudTitle) routeHudTitle.textContent = 'Calculating Travel Route...';
+      if (routeHudDetails) routeHudDetails.textContent = 'Connecting roadways via live routing engine...';
+    }
+
+    let latlngs = [];
+    let distanceKm = 0;
+    let durationMins = 0;
+
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${startLatLng.lng},${startLatLng.lat};${endLatLng.lng},${endLatLng.lat}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data && data.code === 'Ok' && data.routes && data.routes[0]) {
+        const route = data.routes[0];
+        latlngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
+        distanceKm = (route.distance / 1000).toFixed(1);
+        durationMins = Math.max(1, Math.round(route.duration / 60));
+      } else {
+        throw new Error('OSRM no direct road found');
+      }
+    } catch (err) {
+      latlngs = generateArcPoints(startLatLng, endLatLng);
+      const rawDist = calculateDistanceKm(startLatLng.lat, startLatLng.lng, endLatLng.lat, endLatLng.lng);
+      distanceKm = rawDist.toFixed(1);
+      durationMins = Math.max(1, Math.round(rawDist / 60 * 60));
+    }
+
+    routePathCoordinates = latlngs;
+    travelStepIndex = 0;
+
+    if (currentRouteGroup) map.removeLayer(currentRouteGroup);
+
+    const routeCasing = L.polyline(latlngs, {
+      color: '#06b6d4',
+      weight: 8,
+      opacity: 0.45,
+      lineCap: 'round',
+      lineJoin: 'round'
+    });
+
+    const routeCore = L.polyline(latlngs, {
+      color: '#38bdf8',
+      weight: 4,
+      opacity: 0.95,
+      lineCap: 'round',
+      lineJoin: 'round'
+    });
+
+    currentRouteGroup = L.featureGroup([routeCasing, routeCore]).addTo(map);
+
+    // Smoothly pan & fit view
+    map.fitBounds(currentRouteGroup.getBounds(), { padding: [70, 70] });
+
+    if (travelVehicleMarker) map.removeLayer(travelVehicleMarker);
+    travelVehicleMarker = createTravelVehicleMarker(latlngs[0]);
+
+    if (routeHudTitle) routeHudTitle.textContent = `🚗 Travel Route: ${distanceKm} km`;
+    if (routeHudDetails) routeHudDetails.textContent = `Drive: ~${durationMins} mins • Traveling now...`;
+
+    if (startTravelBtn) {
+      if (travelBtnIcon) travelBtnIcon.textContent = '⏸';
+      if (travelBtnText) travelBtnText.textContent = 'Pause';
+    }
+
+    showToast(`Route created: ${distanceKm} km (${durationMins} mins)`);
+
+    setTimeout(() => {
+      startTravelSimulation();
+    }, 300);
+  }
+
+  function startTravelSimulation() {
+    if (routePathCoordinates.length === 0) return;
+    isTraveling = true;
+    if (travelBtnIcon) travelBtnIcon.textContent = '⏸';
+    if (travelBtnText) travelBtnText.textContent = 'Pause';
+
+    function step() {
+      if (!isTraveling) return;
+
+      travelStepIndex += travelSpeed;
+      if (travelStepIndex >= routePathCoordinates.length) {
+        travelStepIndex = routePathCoordinates.length - 1;
+        isTraveling = false;
+        if (travelVehicleMarker) travelVehicleMarker.setLatLng(routePathCoordinates[travelStepIndex]);
+        if (routeProgressBar) routeProgressBar.style.width = '100%';
+        if (travelBtnIcon) travelBtnIcon.textContent = '🔁';
+        if (travelBtnText) travelBtnText.textContent = 'Replay Travel';
+        if (routeHudTitle) routeHudTitle.textContent = '🏁 Arrived at Destination!';
+        showToast('🎉 Travel complete! Arrived at destination.');
+        return;
+      }
+
+      const currentCoord = routePathCoordinates[travelStepIndex];
+      const nextCoord = routePathCoordinates[Math.min(travelStepIndex + 1, routePathCoordinates.length - 1)];
+
+      if (travelVehicleMarker) {
+        travelVehicleMarker.setLatLng(currentCoord);
+
+        const carEl = document.getElementById('activeCarMarker');
+        if (carEl && nextCoord) {
+          const dy = nextCoord[0] - currentCoord[0];
+          const dx = nextCoord[1] - currentCoord[1];
+          const deg = (Math.atan2(dx, dy) * 180 / Math.PI);
+          carEl.style.transform = `rotate(${deg}deg)`;
+        }
+      }
+
+      if (routeProgressBar) {
+        const pct = Math.round((travelStepIndex / (routePathCoordinates.length - 1)) * 100);
+        routeProgressBar.style.width = `${pct}%`;
+      }
+
+      travelAnimTimer = setTimeout(step, 40);
+    }
+
+    step();
+  }
+
+  function stopTravelAnimation() {
+    isTraveling = false;
+    if (travelAnimTimer) clearTimeout(travelAnimTimer);
+    if (travelBtnIcon) travelBtnIcon.textContent = '▶';
+    if (travelBtnText) travelBtnText.textContent = 'Start Travel';
+  }
+
+  // Handle Double-Click / 2-Press on Map
+  function handleLocationPress(latlng) {
+    if (!routeStartMarker) {
+      // 1st press: Set Origin (Point A)
+      routeStartMarker = createRoutePointMarker(latlng, 'A');
+      if (routeTravelHud) {
+        routeTravelHud.classList.add('show');
+        if (routeHudTitle) routeHudTitle.textContent = 'Point A (Start) Set 🟢';
+        if (routeHudDetails) routeHudDetails.textContent = 'Press upon location 2 (double-click) to set Destination 🏁';
+      }
+      showToast('Origin set! Double-click your destination to create route.');
+    } else if (!routeEndMarker) {
+      // 2nd press: Set Destination (Point B) & Route
+      routeEndMarker = createRoutePointMarker(latlng, 'B');
+      calculateAndDrawRoute(routeStartMarker.getLatLng(), latlng);
+    } else {
+      // Both exist: reset and start new route with this as Point A
+      clearTravelRoute(false);
+      routeStartMarker = createRoutePointMarker(latlng, 'A');
+      if (routeTravelHud) {
+        routeTravelHud.classList.add('show');
+        if (routeHudTitle) routeHudTitle.textContent = 'Point A (Start) Set 🟢';
+        if (routeHudDetails) routeHudDetails.textContent = 'Press upon location 2 (double-click) to set Destination 🏁';
+      }
+      showToast('New start set! Double-click destination to create route.');
+    }
+  }
+
+  // Double-Click on Map
+  map.on('dblclick', (e) => {
+    handleLocationPress(e.latlng);
+  });
+
+  // Start / Pause / Replay Button
+  if (startTravelBtn) {
+    startTravelBtn.addEventListener('click', () => {
+      if (isTraveling) {
+        stopTravelAnimation();
+      } else {
+        if (travelStepIndex >= routePathCoordinates.length - 1) {
+          travelStepIndex = 0; // Replay from start
+        }
+        startTravelSimulation();
+      }
+    });
+  }
+
+  // Travel Speed Button
+  if (travelSpeedBtn) {
+    travelSpeedBtn.addEventListener('click', () => {
+      if (travelSpeed === 1) travelSpeed = 2;
+      else if (travelSpeed === 2) travelSpeed = 4;
+      else travelSpeed = 1;
+      travelSpeedBtn.textContent = `Speed: ${travelSpeed}x`;
+      showToast(`Travel speed: ${travelSpeed}x`);
+    });
+  }
+
+  // Clear Route Buttons
+  if (clearRouteActionBtn) {
+    clearRouteActionBtn.addEventListener('click', () => clearTravelRoute(true));
+  }
+  if (closeRouteBtn) {
+    closeRouteBtn.addEventListener('click', () => clearTravelRoute(true));
+  }
+
+  // Route Mode Chip
+  if (routeModeChip) {
+    routeModeChip.addEventListener('click', () => {
+      routeModeChip.classList.toggle('active');
+      showToast('Double-click on any 2 locations on the map to create a travel route!');
+      if (routeTravelHud && !routeTravelHud.classList.contains('show')) {
+        routeTravelHud.classList.add('show');
+        if (routeHudTitle) routeHudTitle.textContent = 'Plan Travel Route';
+        if (routeHudDetails) routeHudDetails.textContent = 'Double-click location 1 for Start, then location 2 for Destination';
+      }
+    });
+  }
 
   // Custom Icon
   const createPinIcon = (color = '#6366f1') => {

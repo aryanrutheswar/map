@@ -114,6 +114,10 @@
           </svg>
           <span id="searchAreaText">Search This Area</span>
         </button>
+        <button id="routeModeChip" class="poi-chip poi-chip-route" title="Double-click 2 locations on map to draw route and travel">
+          <span class="poi-chip-icon">🚗</span>
+          <span>Plan Route</span>
+        </button>
       </div>
 
       <!-- Toggle Explore Drawer Button -->
@@ -173,6 +177,33 @@
         <div class="hud-item">
           <span class="hud-label">STATUS</span>
           <span class="hud-value status-online"><span class="pulse-dot"></span> Live</span>
+        </div>
+      </div>
+
+      <!-- Route Travel HUD -->
+      <div id="routeTravelHud" class="route-travel-hud">
+        <div class="route-hud-header">
+          <div class="route-hud-status">
+            <div class="route-badge-icon">🚗</div>
+            <div>
+              <div id="routeHudTitle" class="route-hud-title">Plan Travel Route</div>
+              <div id="routeHudDetails" class="route-hud-details">Double-click on map to set Point A &amp; Point B</div>
+            </div>
+          </div>
+          <button id="closeRouteBtn" class="route-close-btn" title="Clear Route">&times;</button>
+        </div>
+        
+        <div class="route-progress-bar-container">
+          <div id="routeProgressBar" class="route-progress-bar"></div>
+        </div>
+
+        <div class="route-hud-actions">
+          <button id="startTravelBtn" class="btn btn-sm btn-primary">
+            <span id="travelBtnIcon">▶</span>
+            <span id="travelBtnText">Start Travel</span>
+          </button>
+          <button id="travelSpeedBtn" class="btn btn-sm btn-outline">Speed: 1x</button>
+          <button id="clearRouteActionBtn" class="btn btn-sm btn-secondary">Clear</button>
         </div>
       </div>
 
