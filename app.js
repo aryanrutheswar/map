@@ -1057,12 +1057,86 @@ out center 60;`;
   map.on('move', updateHUD);
   map.on('zoomend', updateHUD);
 
-  // Map Click Handler
-  map.on('click', (e) => {
+  // Map Click Handler: Interactive selection of any place on the map
+  let selectionMarker = null;
+  let isPickOnMapMode = false;
+
+  const selectionPinIcon = L.divIcon({
+    className: 'custom-selection-pin',
+    html: `
+      <div class="selection-pin-bubble">
+        <div class="selection-pin-inner">📍</div>
+      </div>
+    `,
+    iconSize: [38, 38],
+    iconAnchor: [19, 38],
+    popupAnchor: [0, -38]
+  });
+
+  map.on('click', async (e) => {
     if (activeTool === 'marker') {
       addMarkerAt(e.latlng.lat, e.latlng.lng);
+      return;
     } else if (activeTool === 'geofence') {
       drawGeofence(e.latlng.lat, e.latlng.lng);
+      return;
+    }
+
+    // Default map click or Pick-on-map mode: Select location and offer to see nearby spots!
+    const lat = e.latlng.lat;
+    const lng = e.latlng.lng;
+
+    const pickChip = document.getElementById('pickOnMapChip');
+    if (pickChip) pickChip.classList.remove('active');
+    isPickOnMapMode = false;
+
+    if (!selectionMarker) {
+      selectionMarker = L.marker([lat, lng], {
+        icon: selectionPinIcon,
+        zIndexOffset: 1200
+      }).addTo(map);
+    } else {
+      selectionMarker.setLatLng([lat, lng]);
+    }
+
+    selectionMarker.bindPopup(`
+      <div class="selected-place-popup">
+        <div class="selected-place-badge">📍 Identifying Location...</div>
+        <div class="selected-place-coords">${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
+      </div>
+    `).openPopup();
+
+    try {
+      const fullAddr = await reverseGeocode(lat, lng);
+      const cityName = fullAddr.split(',')[0].trim() || 'Selected Location';
+
+      const popupContent = document.createElement('div');
+      popupContent.className = 'selected-place-popup';
+      popupContent.innerHTML = `
+        <div class="selected-place-badge">📍 Selected Location</div>
+        <div class="selected-place-name">${escapeHTML(fullAddr)}</div>
+        <div class="selected-place-coords">${lat.toFixed(5)}, ${lng.toFixed(5)}</div>
+        <div class="selected-place-actions">
+          <button class="select-place-explore-btn">
+            ✨ Show Nearby Spots in ${escapeHTML(cityName)}
+          </button>
+        </div>
+      `;
+
+      const exploreBtn = popupContent.querySelector('.select-place-explore-btn');
+      if (exploreBtn) {
+        exploreBtn.addEventListener('click', () => {
+          focusOnArea(cityName, lat, lng, 14, 25);
+          if (exploreDrawer && !exploreDrawer.classList.contains('open')) {
+            exploreDrawer.classList.add('open');
+          }
+        });
+      }
+
+      selectionMarker.bindPopup(popupContent).openPopup();
+      showToast(`📍 Selected "${cityName}". Click "Show Nearby Spots" in popup to explore!`);
+    } catch (err) {
+      console.warn('Click reverse geocode err:', err);
     }
   });
 
@@ -1294,8 +1368,8 @@ out center 60;`;
     }
   });
 
-  // Automatically detect live location on load!
-  startLiveLocationTracking();
+  // Note: Only track location when user explicitly clicks "My Location" button!
+  // (Prevents auto-locking to the user's home and allows free place selection)
 
   // Google Maps Style Navigation Controls (Locate + Zoom In/Out)
   const navLocateBtn = document.getElementById('navLocateBtn');
@@ -1652,4 +1726,166 @@ export default function NativeMap() {
   copyHelper(copyIframeBtn, iframeSnippet, 'HTML Embed Code');
   copyHelper(copyRnWebviewBtn, rnWebviewSnippet, 'React Native Code');
   copyHelper(copyNativeSdkBtn, nativeSdkSnippet, 'Native SDK Code');
+
+  // ============================================================
+  // SELECT PLACE MODAL & QUICK CITY SELECTOR
+  // ============================================================
+  const openSelectPlaceBtn = document.getElementById('openSelectPlaceBtn');
+  const openSelectPlaceChip = document.getElementById('openSelectPlaceChip');
+  const pickOnMapChip = document.getElementById('pickOnMapChip');
+  const selectPlaceModal = document.getElementById('selectPlaceModal');
+  const closeSelectPlaceModalBtn = document.getElementById('closeSelectPlaceModalBtn');
+  const modalPlaceSearchInput = document.getElementById('modalPlaceSearchInput');
+  const modalSearchGoBtn = document.getElementById('modalSearchGoBtn');
+  const modalSearchResults = document.getElementById('modalSearchResults');
+  const modalPickOnMapBtn = document.getElementById('modalPickOnMapBtn');
+
+  function showSelectPlaceModal() {
+    if (selectPlaceModal) {
+      selectPlaceModal.classList.add('show');
+      if (modalPlaceSearchInput) {
+        setTimeout(() => modalPlaceSearchInput.focus(), 150);
+      }
+    }
+  }
+
+  function hideSelectPlaceModal() {
+    if (selectPlaceModal) {
+      selectPlaceModal.classList.remove('show');
+      if (modalSearchResults) {
+        modalSearchResults.classList.remove('show');
+        modalSearchResults.innerHTML = '';
+      }
+    }
+  }
+
+  if (openSelectPlaceBtn) {
+    openSelectPlaceBtn.addEventListener('click', showSelectPlaceModal);
+  }
+  if (openSelectPlaceChip) {
+    openSelectPlaceChip.addEventListener('click', showSelectPlaceModal);
+  }
+  if (closeSelectPlaceModalBtn) {
+    closeSelectPlaceModalBtn.addEventListener('click', hideSelectPlaceModal);
+  }
+  if (selectPlaceModal) {
+    selectPlaceModal.addEventListener('click', (e) => {
+      if (e.target === selectPlaceModal) hideSelectPlaceModal();
+    });
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && selectPlaceModal.classList.contains('show')) {
+        hideSelectPlaceModal();
+      }
+    });
+  }
+
+  // Quick Select City Cards
+  document.querySelectorAll('.city-card[data-city]').forEach(card => {
+    card.addEventListener('click', () => {
+      const city = card.dataset.city;
+      const lat = parseFloat(card.dataset.lat);
+      const lng = parseFloat(card.dataset.lng);
+      document.querySelectorAll('.city-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      hideSelectPlaceModal();
+      focusOnArea(city, lat, lng, 14, 25);
+      if (exploreDrawer && !exploreDrawer.classList.contains('open')) {
+        exploreDrawer.classList.add('open');
+      }
+    });
+  });
+
+  // Pick Directly on Map Handlers
+  const triggerPickOnMap = () => {
+    hideSelectPlaceModal();
+    isPickOnMapMode = true;
+    if (pickOnMapChip) pickOnMapChip.classList.add('active');
+    showToast('👆 Click anywhere on the map to select that location and explore nearby spots!');
+  };
+
+  if (modalPickOnMapBtn) {
+    modalPickOnMapBtn.addEventListener('click', triggerPickOnMap);
+  }
+  if (pickOnMapChip) {
+    pickOnMapChip.addEventListener('click', triggerPickOnMap);
+  }
+
+  // Search Inside Select Place Modal
+  let modalSearchDebounce = null;
+  if (modalPlaceSearchInput && modalSearchResults) {
+    modalPlaceSearchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim();
+      clearTimeout(modalSearchDebounce);
+      if (query.length < 3) {
+        modalSearchResults.classList.remove('show');
+        modalSearchResults.innerHTML = '';
+        return;
+      }
+      modalSearchDebounce = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          modalSearchResults.innerHTML = '';
+          if (data && data.length > 0) {
+            data.slice(0, 5).forEach(item => {
+              const div = document.createElement('div');
+              div.className = 'search-item';
+              div.textContent = item.display_name;
+              div.addEventListener('click', () => {
+                const lat = parseFloat(item.lat);
+                const lon = parseFloat(item.lon);
+                const placeName = item.display_name.split(',')[0].trim();
+                hideSelectPlaceModal();
+                focusOnArea(placeName, lat, lon, 14, 25);
+                if (exploreDrawer && !exploreDrawer.classList.contains('open')) {
+                  exploreDrawer.classList.add('open');
+                }
+              });
+              modalSearchResults.appendChild(div);
+            });
+            modalSearchResults.classList.add('show');
+          } else {
+            modalSearchResults.classList.remove('show');
+          }
+        } catch (err) {
+          console.error('Modal search err:', err);
+        }
+      }, 350);
+    });
+
+    const executeModalSearch = async () => {
+      const query = modalPlaceSearchInput.value.trim();
+      if (!query) return;
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const item = data[0];
+          const lat = parseFloat(item.lat);
+          const lon = parseFloat(item.lon);
+          const placeName = item.display_name.split(',')[0].trim();
+          hideSelectPlaceModal();
+          focusOnArea(placeName, lat, lon, 14, 25);
+          if (exploreDrawer && !exploreDrawer.classList.contains('open')) {
+            exploreDrawer.classList.add('open');
+          }
+        } else {
+          showToast('Place not found. Try another city name.');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (modalSearchGoBtn) {
+      modalSearchGoBtn.addEventListener('click', executeModalSearch);
+    }
+
+    modalPlaceSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeModalSearch();
+      }
+    });
+  }
 });

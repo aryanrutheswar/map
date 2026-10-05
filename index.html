@@ -48,6 +48,13 @@
 
       <!-- Quick Actions -->
       <div class="header-actions">
+        <button id="openSelectPlaceBtn" class="btn btn-select-place" title="Select any place or city to explore nearby spots">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span>Select Place</span>
+        </button>
         <button id="locateBtn" class="btn btn-secondary" title="Locate Me">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"></circle>
@@ -117,6 +124,14 @@
         <button id="routeModeChip" class="poi-chip poi-chip-route" title="Double-click 2 locations on map to draw route and travel">
           <span class="poi-chip-icon">🚗</span>
           <span>Plan Route</span>
+        </button>
+        <button id="openSelectPlaceChip" class="poi-chip poi-chip-select" title="Select any place or city to view nearby spots">
+          <span class="poi-chip-icon">🗺️</span>
+          <span>Select Place</span>
+        </button>
+        <button id="pickOnMapChip" class="poi-chip poi-chip-pick" title="Click anywhere on the map to select that location">
+          <span class="poi-chip-icon">👆</span>
+          <span>Click Map to Select</span>
         </button>
         <button id="chittoorShortcutBtn" class="poi-chip poi-chip-highlight" title="Show spots in Chittoor only">
           <span class="poi-chip-icon">📍</span>
@@ -244,6 +259,101 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Select Place to Explore Modal -->
+  <div id="selectPlaceModal" class="modal-backdrop">
+    <div class="modal-dialog select-place-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon select-place-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <div>
+            <h2 class="modal-title">Select Place to Explore</h2>
+            <p class="modal-subtitle">Choose any city or click on the map to discover nearby hotels, cafes, temples &amp; attractions</p>
+          </div>
+        </div>
+        <button id="closeSelectPlaceModalBtn" class="modal-close-btn" title="Close">&times;</button>
+      </div>
+
+      <!-- Quick Search Inside Modal -->
+      <div class="select-place-search-container">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="modalPlaceSearchInput" placeholder="Search any city or place (e.g. Tirupati, Chittoor, Bangalore, Delhi)..." autocomplete="off">
+        <button id="modalSearchGoBtn" class="btn btn-primary btn-sm">Search</button>
+        <div id="modalSearchResults" class="search-dropdown"></div>
+      </div>
+
+      <!-- Quick Cities Grid -->
+      <div class="quick-cities-section">
+        <div class="quick-cities-title">Quick Select Popular Places:</div>
+        <div class="quick-cities-grid">
+          <button class="city-card" data-city="Chittoor" data-lat="13.2172" data-lng="79.1003">
+            <span class="city-emoji">📍</span>
+            <div class="city-info">
+              <div class="city-name">Chittoor</div>
+              <div class="city-desc">Temples, Forts &amp; Waterfalls</div>
+            </div>
+          </button>
+          <button class="city-card" data-city="Tirupati" data-lat="13.6288" data-lng="79.4192">
+            <span class="city-emoji">🛕</span>
+            <div class="city-info">
+              <div class="city-name">Tirupati</div>
+              <div class="city-desc">Lord Venkateswara Temple &amp; Hotels</div>
+            </div>
+          </button>
+          <button class="city-card" data-city="Bengaluru" data-lat="12.9716" data-lng="77.5946">
+            <span class="city-emoji">🏙️</span>
+            <div class="city-info">
+              <div class="city-name">Bengaluru</div>
+              <div class="city-desc">Cafes, Tech Parks &amp; Gardens</div>
+            </div>
+          </button>
+          <button class="city-card" data-city="Chennai" data-lat="13.0827" data-lng="80.2707">
+            <span class="city-emoji">🌊</span>
+            <div class="city-info">
+              <div class="city-name">Chennai</div>
+              <div class="city-desc">Marina Beach &amp; Ancient Temples</div>
+            </div>
+          </button>
+          <button class="city-card" data-city="Hyderabad" data-lat="17.3850" data-lng="78.4867">
+            <span class="city-emoji">🏰</span>
+            <div class="city-info">
+              <div class="city-name">Hyderabad</div>
+              <div class="city-desc">Charminar, Palaces &amp; Biryani</div>
+            </div>
+          </button>
+          <button class="city-card" data-city="Mumbai" data-lat="19.0760" data-lng="72.8777">
+            <span class="city-emoji">🌆</span>
+            <div class="city-info">
+              <div class="city-name">Mumbai</div>
+              <div class="city-desc">Gateway of India &amp; Marine Drive</div>
+            </div>
+          </button>
+          <button class="city-card" data-city="Delhi" data-lat="28.6139" data-lng="77.2090">
+            <span class="city-emoji">🏛️</span>
+            <div class="city-info">
+              <div class="city-name">Delhi</div>
+              <div class="city-desc">Red Fort, India Gate &amp; Markets</div>
+            </div>
+          </button>
+          <button class="city-card highlight-pick-card" id="modalPickOnMapBtn">
+            <span class="city-emoji">👆</span>
+            <div class="city-info">
+              <div class="city-name">Click Anywhere on Map</div>
+              <div class="city-desc">Tap any location directly on the map</div>
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

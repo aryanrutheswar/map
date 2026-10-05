@@ -1528,5 +1528,236 @@ body, html {
   font-weight: 600;
 }
 
+/* ============================================================
+   SELECT PLACE BUTTONS & MODAL STYLES
+   ============================================================ */
+.btn-select-place {
+  background: linear-gradient(135deg, #6366f1, #06b6d4) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4), 0 0 12px rgba(6, 182, 212, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-select-place:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6), 0 0 18px rgba(6, 182, 212, 0.5) !important;
+}
+
+.poi-chip-select {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.25));
+  border: 1px solid rgba(99, 102, 241, 0.5);
+  color: #818cf8;
+  font-weight: 700;
+}
+
+.poi-chip-select:hover {
+  background: linear-gradient(135deg, #6366f1, #06b6d4);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.6);
+}
+
+.poi-chip-pick {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.poi-chip-pick:hover,
+.poi-chip-pick.active {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+}
+
+/* Modal specific */
+.select-place-dialog {
+  max-width: 680px;
+  background: rgba(15, 20, 34, 0.96) !important;
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.select-place-icon {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(6, 182, 212, 0.3));
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.select-place-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  transition: all 0.2s ease;
+}
+
+.select-place-search-container:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 18px rgba(99, 102, 241, 0.35);
+}
+
+.select-place-search-container input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+}
+
+.quick-cities-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quick-cities-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.quick-cities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.city-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  color: #f1f5f9;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.city-card:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.city-card.active {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.6);
+}
+
+.highlight-pick-card {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.2)) !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.highlight-pick-card:hover {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4) !important;
+}
+
+.city-emoji {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.city-name {
+  font-weight: 700;
+  font-size: 13.5px;
+  color: #ffffff;
+}
+
+.city-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+  line-height: 1.25;
+}
+
+/* Interactive Map Selection Popup & Pin */
+.selection-pin-bubble {
+  width: 38px;
+  height: 38px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: 3px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 20px #f59e0b;
+}
+
+.selection-pin-inner {
+  transform: rotate(45deg);
+  font-size: 16px;
+}
+
+.selected-place-popup {
+  padding: 4px;
+  min-width: 200px;
+}
+
+.selected-place-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  margin-bottom: 6px;
+}
+
+.selected-place-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.selected-place-coords {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+  margin-bottom: 10px;
+}
+
+.select-place-explore-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981, #06b6d4) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  transition: all 0.2s ease;
+}
+
+.select-place-explore-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6);
+}
+
+
 
 
