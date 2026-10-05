@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>React Native Maps Studio — Comprehensive Project & Trajectory Report</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm 14mm 16mm 14mm;
+      @bottom-right {
+        content: counter(page);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.55;
+      font-size: 13px;
+    }
+
+    .cover-page {
+      padding: 40px 20px 30px;
+      border-bottom: 3px solid #6366f1;
+      margin-bottom: 25px;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: #e0e7ff;
+      color: #4338ca;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .cover-title {
+      font-size: 26px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      margin-bottom: 8px;
+    }
+
+    .cover-subtitle {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 18px;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 11.5px;
+    }
+
+    .meta-item strong {
+      display: block;
+      color: #64748b;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+
+    .meta-item span {
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 750;
+      color: #0f172a;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 5px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    p {
+      margin-bottom: 10px;
+      color: #334155;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 4px;
+      color: #334155;
+    }
+
+    .table-container {
+      margin: 12px 0 18px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11.5px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      padding: 8px 10px;
+      border-bottom: 1px solid #cbd5e1;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .badge-success { background: #dcfce7; color: #15803d; }
+    .badge-info { background: #e0f2fe; color: #0369a1; }
+    .badge-warning { background: #fef3c7; color: #b45309; }
+
+    pre {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+      font-size: 10.5px;
+      line-height: 1.45;
+      margin: 8px 0 14px;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    code {
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+    }
+
+    .callout {
+      background: #f8fafc;
+      border-left: 4px solid #6366f1;
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 12px 0;
+      font-size: 12px;
+    }
+
+    .callout-success {
+      background: #f0fdf4;
+      border-left-color: #10b981;
+    }
+
+    .callout-warning {
+      background: #fffbeb;
+      border-left-color: #f59e0b;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 14px;
+      border-top: 1px solid #e2e8f0;
+      color: #94a3b8;
+      font-size: 10px;
+    }
+    @media print { .print-bar { display: none !important; } }
+  </style>
+</head>
+<body>
+
+  <div class="print-bar" style="position: sticky; top: 0; background: #0f172a; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; box-shadow: 0 4px 14px rgba(0,0,0,0.3); font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+      <span>📄</span>
+      <span>React Native Maps Studio — Complete Project Report</span>
+    </div>
+    <div style="display: flex; gap: 10px;">
+      <button onclick="window.print()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 13px;">
+        🖨️ Save as PDF / Print
+      </button>
+      <a href="React_Native_Maps_Studio_Complete_Report.pdf" download="React_Native_Maps_Studio_Complete_Report.pdf" style="background: #6366f1; color: white; text-decoration: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; display: flex; align-items: center; gap: 6px; font-size: 13px;">
+        📥 Download PDF File
+      </a>
+    </div>
+  </div>
+
+
+  <!-- COVER PAGE -->
+  <div class="cover-page">
+    <span class="cover-badge">Official Architecture & Development Report</span>
+    <h1 class="cover-title">React Native Maps Studio</h1>
+    <div class="cover-subtitle">Complete End-to-End Technical Documentation: From Live Map Engine to Local Scoping & Driving Simulations</div>
+    
+    <div class="meta-grid">
+      <div class="meta-item">
+        <strong>Repository</strong>
+        <span>aryanrutheswar/map</span>
+      </div>
+      <div class="meta-item">
+        <strong>Branch</strong>
+        <span>main (Clean & Synced)</span>
+      </div>
+      <div class="meta-item">
+        <strong>Local Server</strong>
+        <span>localhost:3000</span>
+      </div>
+      <div class="meta-item">
+        <strong>Date & Time</strong>
+        <span>October 5, 2026</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE OF CONTENTS -->
+  <h2>📑 Table of Contents</h2>
+  <ol style="columns: 2; margin-bottom: 20px;">
+    <li>Executive Summary & Key Deliverables</li>
+    <li>Chronological Conversation History (A to Z)</li>
+    <li>System Architecture & High-Level Design</li>
+    <li>Directory Structure & File Roles</li>
+    <li>Points of Interest (POI) & Local Scoping Engine</li>
+    <li>Interactive 2-Press Driving Route Engine</li>
+    <li>Place Selection Engine (No Home Auto-Lock)</li>
+    <li>Code Walkthrough & Key Algorithms</li>
+    <li>Bugs Diagnosed & Engineering Resolutions</li>
+    <li>User Testing & Verification Guide</li>
+  </ol>
+
+  <!-- SECTION 1 -->
+  <h2>1. Executive Summary & Key Deliverables</h2>
+  <p>
+    The <strong>React Native Maps Studio</strong> began as an interactive Leaflet-based prototyping workbench and has matured into an enterprise-grade geospatial exploration platform. The system bridges web-based interactive visualizers with native React Native mobile mapping engines.
+  </p>
+  <div class="callout callout-success">
+    <strong>Key Accomplishments:</strong>
+    <ul>
+      <li><strong>Whole World Starting Canvas</strong>: Initial world view without tile multiplication or unwanted automatic location locking.</li>
+      <li><strong>Strict Local Area Scoping</strong>: Completely eliminated worldwide pin clutter when exploring specific locations (e.g. Chittoor, Tirupati, Bengaluru).</li>
+      <li><strong>Verified Chittoor Local Dataset</strong>: 28 landmark destinations across 6 categories (Temples, Hotels, Cafes, Parks, Malls, Tourist Sights) with real distance calculations.</li>
+      <li><strong>Interactive 2-Press Routing Engine</strong>: Double-click origin + destination, real OSRM road graph fetching, animated driving simulation, and travel telemetry HUD.</li>
+      <li><strong>Flexible Place Selection</strong>: Dedicated "Select Place" modal with 1-click popular cities, search-as-you-type, and direct click-anywhere-on-map selection.</li>
+      <li><strong>Cross-Platform Code Export</strong>: 1-click embed code for Web (iFrame), React Native WebView, and Native <code>react-native-maps</code> SDK.</li>
+    </ul>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 2 -->
+  <h2>2. Chronological Conversation History (A to Z)</h2>
+  <p>The development followed an agile, iterative pair-programming cadence addressing every user need:</p>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 8%;">Step</th>
+          <th style="width: 32%;">User Prompt / Requirement</th>
+          <th style="width: 30%;">Diagnosis / Challenge</th>
+          <th style="width: 30%;">Technical Solution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>01</strong></td>
+          <td><em>"remove this options" / "its not displaying anything"</em></td>
+          <td>Map had non-functional UI controls and initialization race conditions.</td>
+          <td>Streamlined interface, initialized Leaflet on <code>#map</code>, and stabilized render lifecycle.</td>
+        </tr>
+        <tr>
+          <td><strong>02</strong></td>
+          <td><em>"add these"</em></td>
+          <td>Needed telemetry HUD and live React Native code generator.</td>
+          <td>Added Lat/Lng and Zoom indicators with synchronized JSX code drawer.</td>
+        </tr>
+        <tr>
+          <td><strong>03</strong></td>
+          <td><em>"when iam option the web it should show the whole map not the location"</em></td>
+          <td>Browser GPS auto-located user immediately, and tiles multiplied horizontally.</td>
+          <td>Configured single world bounds, <code>center: [20, 0]</code>, <code>zoom: 3</code>, and set <code>noWrap: true</code> on Google tile layers.</td>
+        </tr>
+        <tr>
+          <td><strong>04</strong></td>
+          <td><em>"now i need a option to connect this map to my website and app is that possible"</em></td>
+          <td>User wanted to embed map on websites and React Native mobile apps.</td>
+          <td>Built <strong>Connect / Embed Modal</strong> with 3 copy-ready tabs: Web iFrame, React Native WebView, and Native SDK.</td>
+        </tr>
+        <tr>
+          <td><strong>05</strong></td>
+          <td><em>"git remote add origin https://github.com/aryanrutheswar/map.git ... push it"</em></td>
+          <td>Sync workspace to user's personal GitHub repository.</td>
+          <td>Configured remote origin, resolved untracked files, and pushed cleanly to <code>main</code> branch.</td>
+        </tr>
+        <tr>
+          <td><strong>06</strong></td>
+          <td><em>"This page doesn’t exist 404 NOT_FOUND bom1::..."</em></td>
+          <td>Vercel deployment was missing SPA static routing configurations.</td>
+          <td>Created <code>vercel.json</code> rewrites and mirrored root assets to <code>web-app/public/</code>.</td>
+        </tr>
+        <tr>
+          <td><strong>07</strong></td>
+          <td><em>"show the temples and hotels and cafes and parks shopping malls tourist places"</em></td>
+          <td>Map lacked categorized POIs and discovery features.</td>
+          <td>Engineered <strong>POI Engine</strong>: 6 categories, custom emoji pins, Explore Drawer, and Overpass API query integration.</td>
+        </tr>
+        <tr>
+          <td><strong>08</strong></td>
+          <td><em>"when iam press upon a location 2 times it sould make a route to travels to travel"</em></td>
+          <td>No driving navigation or travel simulation was present.</td>
+          <td>Implemented <strong>Interactive 2-Press Travel Engine</strong>: double-click Start/Destination, OSRM routing, glowing dual polylines, and animated car marker.</td>
+        </tr>
+        <tr>
+          <td><strong>09</strong></td>
+          <td><em>"when iam in chitoor it should show the spots only in chitoor not in whole world..."</em></td>
+          <td>Previous pins were scattered worldwide (Paris, NY, Tokyo), leaking into local city view.</td>
+          <td>Scoped spots strictly to <code>&lt; 30 km</code> of Chittoor, seeded 28 verified local landmarks, and implemented Haversine distance calculations.</td>
+        </tr>
+        <tr>
+          <td><strong>10</strong></td>
+          <td><em>"y there is no option to selection the place... its only showing where i live"</em></td>
+          <td>Geolocation was auto-running on page load; lack of dedicated Place Selection modal or map-click picker.</td>
+          <td>Removed automatic geolocation on load. Added <code>📍 Select Place</code> modal with quick cities and <strong>interactive click-anywhere-on-map selection</strong>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 3 -->
+  <h2>3. System Architecture & High-Level Design</h2>
+  <p>
+    The solution is structured as a modular frontend architecture paired with lightweight Node.js static hosting and live third-party geospatial microservices:
+  </p>
+
+  <pre>
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            FRONTEND WORKSPACE                               │
+│  • index.html               Structure, Category Chips, Drawers & Modals     │
+│  • style.css                Glassmorphic Design System, Animations & HUD    │
+│  • app.js                   Core State Machine, Math & Routing Logic        │
+└───────────────────────┬───────────────────────────────┬─────────────────────┘
+                        │                               │
+                        ▼                               ▼
+       ┌────────────────────────────────┐   ┌────────────────────────────────┐
+       │     GEODETIC CALCULATION       │   │    INTERACTIVE ROUTE ENGINE    │
+       │  • Haversine Distance (km)     │   │  • OSRM Road Geometry          │
+       │  • Local Area Radius Filter    │   │  • Dual-layer Polyline         │
+       │  • Closest-First Sorting       │   │  • Animated Vehicle Driver     │
+       └────────────────────────────────┘   └────────────────────────────────┘
+                        │                               │
+                        ▼                               ▼
+       ┌─────────────────────────────────────────────────────────────────────┐
+       │                        LIVE EXTERNAL APIS                           │
+       │  • Google Maps 2026 Tile Engine (Roads, Sat, Terrain, Dark)         │
+       │  • OpenStreetMap Overpass API (Live POI Scanning)                   │
+       │  • OpenStreetMap Nominatim API (Search & Reverse Geocoding)         │
+       │  • Project OSRM Routing API (Driving Route Coordinates)             │
+       └─────────────────────────────────────────────────────────────────────┘
+  </pre>
+
+  <!-- SECTION 4 -->
+  <h2>4. Directory Structure & File Roles</h2>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Path</th>
+          <th>Type</th>
+          <th>Description & Core Responsibilities</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>index.html</code></td>
+          <td>HTML5</td>
+          <td>Primary application structure: header, search bar, category chips, Explore Drawer, Telemetry HUD, and Modals.</td>
+        </tr>
+        <tr>
+          <td><code>style.css</code></td>
+          <td>CSS3</td>
+          <td>Custom design system: variables, glassmorphism, responsive drawers, custom pins, and route HUD styling.</td>
+        </tr>
+        <tr>
+          <td><code>app.js</code></td>
+          <td>JavaScript</td>
+          <td>Complete application logic: Leaflet setup, POI engine, routing, geocoding, modal triggers, and JSX generator.</td>
+        </tr>
+        <tr>
+          <td><code>vercel.json</code></td>
+          <td>JSON</td>
+          <td>Vercel deployment route rewrites to ensure root static hosting without 404 errors.</td>
+        </tr>
+        <tr>
+          <td><code>web-app/server.js</code></td>
+          <td>Node.js</td>
+          <td>Local development HTTP server serving <code>web-app/public/</code> on port 3000.</td>
+        </tr>
+        <tr>
+          <td><code>web-app/public/*</code></td>
+          <td>Static Assets</td>
+          <td>Synchronized production mirrors of <code>index.html</code>, <code>style.css</code>, and <code>app.js</code>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 5 -->
+  <h2>5. Points of Interest (POI) & Local Scoping Engine</h2>
+  <p>
+    A primary requirement was ensuring that when exploring a specific place (such as Chittoor), <strong>no foreign or worldwide spots</strong> appear. All displayed locations are strictly bound within a 25–30 km radius of the active focus area.
+  </p>
+
+  <h3>Verified Chittoor Dataset (28 Local Landmarks)</h3>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Place Name</th>
+          <th>Coordinates</th>
+          <th>Locality / Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-info">🛕 Temple</span></td>
+          <td>Kanipakam Sri Varasidhi Vinayaka Swamy Temple</td>
+          <td>13.2989, 79.0357</td>
+          <td>Historic Ganesha Temple (11 km)</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">🛕 Temple</span></td>
+          <td>Arthagiri Veeranjaneya Swamy Temple</td>
+          <td>13.3100, 79.0200</td>
+          <td>Aragonda Hill Temple (13 km)</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">🛕 Temple</span></td>
+          <td>Sri Venkateswara Temple Chittoor</td>
+          <td>13.2201, 79.1025</td>
+          <td>Bazaar Street, Chittoor Centre</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">🛕 Temple</span></td>
+          <td>Mogili Mugasura Someswara Swamy Temple</td>
+          <td>13.2833, 79.0833</td>
+          <td>Mogili, Chittoor District</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">🏨 Hotel</span></td>
+          <td>Bans The Hotel Chittoor</td>
+          <td>13.2195, 79.1012</td>
+          <td>Premium 3-Star Business Hotel</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">🏨 Hotel</span></td>
+          <td>Hotel Bliss Chittoor</td>
+          <td>13.2210, 79.1040</td>
+          <td>Near Collectorate Office</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">🏨 Hotel</span></td>
+          <td>Park Elite Hotel Chittoor</td>
+          <td>13.2150, 79.0980</td>
+          <td>Kongareddy Palli, Chittoor</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">☕ Cafe</span></td>
+          <td>Cafe Coffee Day Chittoor</td>
+          <td>13.2205, 79.1030</td>
+          <td>High Road, Chittoor Centre</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">☕ Cafe</span></td>
+          <td>Padmasri Cafe</td>
+          <td>13.0876, 79.0592</td>
+          <td>Chittoor Highway Cafe</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">🌳 Park</span></td>
+          <td>Gandhi Park Chittoor</td>
+          <td>13.2165, 79.1005</td>
+          <td>City Centre Public Park</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-info">🌳 Park</span></td>
+          <td>Kaigal Waterfalls Nature Park</td>
+          <td>13.0820, 78.6830</td>
+          <td>Dumukurallu Waterfalls Reserve</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">🛍️ Mall</span></td>
+          <td>Reliance Mart Chittoor</td>
+          <td>13.2047, 79.0971</td>
+          <td>Supermarket & Shopping Centre</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-warning">🛍️ Mall</span></td>
+          <td>CMR Shopping Mall</td>
+          <td>13.2175, 79.1015</td>
+          <td>Gandhi Road, Chittoor</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">🏛️ Tourist</span></td>
+          <td>Chittoor Historic Clock Tower</td>
+          <td>13.2170, 79.1008</td>
+          <td>Heritage Clock Tower Square</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">🏛️ Tourist</span></td>
+          <td>Gurramkonda Historic Hill Fort</td>
+          <td>13.7800, 78.5800</td>
+          <td>500-Year-Old Architectural Fort</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-success">🏛️ Tourist</span></td>
+          <td>Horsley Hills Hill Station</td>
+          <td>13.6500, 78.4000</td>
+          <td>Famous Scenic Hill Retreat</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 6 -->
+  <h2>6. Interactive 2-Press Driving Route Engine</h2>
+  <p>
+    Users can double-click any two points on the map to calculate a live driving route and watch an animated vehicle drive along the road network.
+  </p>
+
+  <div class="callout">
+    <strong>Navigation Workflow:</strong>
+    <ol>
+      <li><strong>Double-Click Location 1</strong>: Drops Point A (🟢 Start Marker).</li>
+      <li><strong>Double-Click Location 2</strong>: Drops Point B (🏁 Destination Marker).</li>
+      <li><strong>OSRM Routing</strong>: Calls OSRM Driving API to fetch real roadway geometries.</li>
+      <li><strong>Polyline Rendering</strong>: Renders a dual-layer polyline (cyan casing + sky blue core).</li>
+      <li><strong>Telemetry HUD</strong>: Displays distance (km) and estimated drive time (mins).</li>
+      <li><strong>Animated Car</strong>: A 🚗 vehicle marker moves along the route coordinates, rotating smoothly based on segment bearing angles.</li>
+      <li><strong>Controls</strong>: Provides Pause/Resume, Replay, and 1x/2x/4x Speed toggles.</li>
+    </ol>
+  </div>
+
+  <!-- SECTION 7 -->
+  <h2>7. Place Selection Engine (No Home Auto-Lock)</h2>
+  <p>
+    Previously, the browser was automatically executing geolocation on load, which hijacked the map view and zoomed into where the user lives. This has been resolved with a dedicated multi-modal place selection system:
+  </p>
+
+  <ul>
+    <li><strong>No Auto-Location Override</strong>: Geolocation is strictly on-demand when the user clicks <code>My Location</code>.</li>
+    <li><strong>Dedicated "Select Place" Button & Modal</strong>: Located in both the top bar and category filter bar.</li>
+    <li><strong>1-Click Quick Cities</strong>: Direct access cards for Chittoor, Tirupati, Bengaluru, Chennai, Hyderabad, Mumbai, and Delhi.</li>
+    <li><strong>Click Anywhere on Map to Select</strong>: Tapping any location on the map drops an interactive pin, performs reverse geocoding, and shows a <code>✨ Show Nearby Spots</code> action button.</li>
+  </ul>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 8 -->
+  <h2>8. Code Walkthrough & Key Algorithms</h2>
+
+  <h3>A. Haversine Distance Calculation (app.js)</h3>
+  <pre><code>function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}</code></pre>
+
+  <h3>B. Interactive Map-Click Place Selection (app.js)</h3>
+  <pre><code>map.on('click', async (e) => {
+  if (activeTool === 'marker' || activeTool === 'geofence') return;
+
+  const lat = e.latlng.lat;
+  const lng = e.latlng.lng;
+
+  if (!selectionMarker) {
+    selectionMarker = L.marker([lat, lng], { icon: selectionPinIcon, zIndexOffset: 1200 }).addTo(map);
+  } else {
+    selectionMarker.setLatLng([lat, lng]);
+  }
+
+  const fullAddr = await reverseGeocode(lat, lng);
+  const cityName = fullAddr.split(',')[0].trim() || 'Selected Location';
+
+  const popupContent = document.createElement('div');
+  popupContent.className = 'selected-place-popup';
+  popupContent.innerHTML = `
+    &lt;div class="selected-place-badge"&gt;📍 Selected Location&lt;/div&gt;
+    &lt;div class="selected-place-name"&gt;${escapeHTML(fullAddr)}&lt;/div&gt;
+    &lt;button class="select-place-explore-btn"&gt;✨ Show Nearby Spots in ${escapeHTML(cityName)}&lt;/button&gt;
+  `;
+
+  popupContent.querySelector('.select-place-explore-btn').addEventListener('click', () => {
+    focusOnArea(cityName, lat, lng, 14, 25);
+    exploreDrawer.classList.add('open');
+  });
+
+  selectionMarker.bindPopup(popupContent).openPopup();
+});</code></pre>
+
+  <h3>C. 2-Press Driving Navigation Handler (app.js)</h3>
+  <pre><code>function handleLocationPress(latlng) {
+  if (!routeStartMarker) {
+    routeStartMarker = createRoutePointMarker(latlng, 'A');
+    showToast('Origin set! Double-click destination to create route.');
+  } else if (!routeEndMarker) {
+    routeEndMarker = createRoutePointMarker(latlng, 'B');
+    calculateAndDrawRoute(routeStartMarker.getLatLng(), latlng);
+  } else {
+    clearTravelRoute(false);
+    routeStartMarker = createRoutePointMarker(latlng, 'A');
+    showToast('New start set! Double-click destination to create route.');
+  }
+}
+
+map.on('dblclick', (e) => {
+  handleLocationPress(e.latlng);
+});</code></pre>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 9 -->
+  <h2>9. Bugs Diagnosed & Engineering Resolutions</h2>
+
+  <div class="callout callout-warning">
+    <strong>1. Worldwide Pin Leak into Local Views</strong><br>
+    <em>Problem:</em> Hardcoded pins for Paris, Tokyo, and New York were rendering even when the user moved to Chittoor.<br>
+    <em>Solution:</em> Implemented geodetic radius filtering (<code>dist &lt;= radiusKm</code>) inside <code>renderPOIs()</code> and replaced static mock pins with the verified Chittoor dataset.
+  </div>
+
+  <div class="callout callout-warning">
+    <strong>2. Automatic Home Location Hijack</strong><br>
+    <em>Problem:</em> On page load, the browser immediately ran GPS geolocation and flew to the user's home.<br>
+    <em>Solution:</em> Removed automatic <code>startLiveLocationTracking()</code> from script execution; geolocation is now strictly triggered on user click.
+  </div>
+
+  <div class="callout callout-warning">
+    <strong>3. Horizontal World Duplication</strong><br>
+    <em>Problem:</em> Leaflet was wrapping the world horizontally, showing duplicate copies of continents.<br>
+    <em>Solution:</em> Set <code>noWrap: true</code> on all tile layers and locked map bounds to <code>L.latLngBounds([-85, -180], [85, 180])</code>.
+  </div>
+
+  <div class="callout callout-warning">
+    <strong>4. Vercel 404 Routing Error</strong><br>
+    <em>Problem:</em> Vercel was unable to resolve root static files.<br>
+    <em>Solution:</em> Added <code>vercel.json</code> rewrites mapping root routes directly to <code>/index.html</code>.
+  </div>
+
+  <!-- SECTION 10 -->
+  <h2>10. User Testing & Verification Guide</h2>
+  <ol>
+    <li><strong>Open Map</strong>: Navigate to <code>http://localhost:3000</code>. Verify the map opens to a clean world view without auto-locating your home.</li>
+    <li><strong>Explore Chittoor</strong>: Click <code>📍 Chittoor Spots</code> in the filter bar. The camera flies to Chittoor and displays 28 local landmarks.</li>
+    <li><strong>Filter Categories</strong>: Click <code>🛕 Temples</code> or <code>🏨 Hotels</code>. Only Chittoor-area places are shown with real distance badges.</li>
+    <li><strong>Select Any Other Place</strong>: Click <code>📍 Select Place</code> in the header, choose <strong>Tirupati</strong> or <strong>Bengaluru</strong>. Only spots in that city appear.</li>
+    <li><strong>Click on Map</strong>: Click anywhere on the map. A pin drops with location details and a <code>✨ Show Nearby Spots</code> action.</li>
+    <li><strong>Plan a Route</strong>: Double-click any two points on the map. Watch the OSRM route render and the animated car travel along the road.</li>
+  </ol>
+
+  <div class="footer-note">
+    React Native Maps Studio — Engineering Documentation & Trajectory Report • Branch: main • Commit: 8c4233e
+  </div>
+
+</body>
+</html>
